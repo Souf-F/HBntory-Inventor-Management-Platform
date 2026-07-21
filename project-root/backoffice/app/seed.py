@@ -5,35 +5,43 @@ Creates the SQLite file (via db.create_all()) and populates it with:
 - a few branches
 - the one admin account
 - a couple of common users (one per branch, for testing)
-- test stock rows, using product_id values matching the team's test
-  product list (see recap_complet_hbntory.md, section 9)
+- test stock rows, using product_id (SKU) values matching real entries
+  from the Product API test catalog (e.g. "HB-LAP-1001")
 
-Run with:
-    python seed.py
+This file lives inside the app/ package, so it must be run as a module
+from the backoffice/ root directory:
+
+    python3 -m app.seed
+
+Running it as a plain script (python3 seed.py) will fail with an import
+error, since relative imports only work when Python recognizes app/ as
+a package (which -m does, but a direct script call does not).
 
 Safe to re-run: skips seeding if data already exists.
 """
 
 import bcrypt
 
-from app import create_app
-from app.models import db, Branch, User, Role, Stock
+from . import create_app
+from .models import db, Branch, User, Role, Stock
 
 app = create_app()
 
-# Product IDs used for local testing only — actual product details always
-# come from the external Product API, never stored here (golden rule).
+# SKUs used for local testing. Match these against real entries in the
+# Product API test catalog where possible (see product_api.py) — the
+# golden rule still applies: no product details are stored here, only
+# the identifier.
 TEST_PRODUCT_IDS = [
-    "prod-001",  # Huile de tournesol 5L
-    "prod-002",  # Farine T55 25kg
-    "prod-003",  # Sucre en poudre 5kg
-    "prod-004",  # Café en grains 1kg
-    "prod-005",  # Tomates pelées 2,5kg
-    "prod-006",  # Essuie-tout pro (carton de 6)
-    "prod-007",  # Gants latex jetables (boîte de 100)
-    "prod-008",  # Riz basmati 5kg
-    "prod-009",  # Eau plate 1,5L (pack de 6)
-    "prod-010",  # Produit d'entretien sol multi-usage 5L
+    "HB-LAP-1001",
+    "HB-ACC-1002",
+    "HB-ACC-1003",
+    "HB-KIT-1004",
+    "HB-FOOD-1005",
+    "HB-FOOD-1006",
+    "HB-SUP-1007",
+    "HB-FOOD-1008",
+    "HB-FOOD-1009",
+    "HB-CLN-1010",
 ]
 
 
@@ -79,7 +87,7 @@ def seed():
             )
             db.session.add(user)
 
-        # --- Test stock: spread the 10 test products across branches ---
+        # --- Test stock: spread the test SKUs across branches ---
         for i, product_id in enumerate(TEST_PRODUCT_IDS):
             branch = branches[i % len(branches)]
             db.session.add(

@@ -20,3 +20,8 @@ class Config:
 
     # Used for Flask session signing (Souf's auth work depends on this).
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+
+    # External Product API (read-only, provided by the school — see
+    # https://github.com/hbtn-edu/hbntory-products-api).
+    # Default matches `docker compose up` from that repo, exposed on the host.
+    PRODUCT_API_URL = os.environ.get("PRODUCT_API_URL", "http://localhost:5001")
