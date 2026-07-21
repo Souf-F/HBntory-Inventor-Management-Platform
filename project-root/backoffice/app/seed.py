@@ -33,15 +33,15 @@ app = create_app()
 # the identifier.
 TEST_PRODUCT_IDS = [
     "HB-LAP-1001",
-    "HB-ACC-1002",
-    "HB-ACC-1003",
-    "HB-KIT-1004",
-    "HB-FOOD-1005",
-    "HB-FOOD-1006",
-    "HB-SUP-1007",
-    "HB-FOOD-1008",
-    "HB-FOOD-1009",
-    "HB-CLN-1010",
+    "HB-LAP-1002",
+    "HB-MON-2101",
+    "HB-MON-2102",
+    "HB-DCK-3001",
+    "HB-KBD-4101",
+    "HB-KBD-4102",
+    "HB-MSE-4201",
+    "HB-CAM-5101",
+    "HB-MIC-5201",
 ]
 
 

@@ -70,13 +70,13 @@ def list_products(**filters) -> list[dict]:
     explicitly expected case, not an error.
     """
     data = _get("/api/v1/products", params=filters)
-    return data.get("products", data if isinstance(data, list) else [])
+    return data.get("results", [])
 
 
 def search_products(query: str) -> list[dict]:
     """Search products by name, SKU, description, or tag."""
     data = _get("/api/v1/products/search", params={"q": query})
-    return data.get("products", data if isinstance(data, list) else [])
+    return data.get("results", [])
 
 
 def get_product(sku_or_id) -> dict | None:
