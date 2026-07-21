@@ -24,4 +24,4 @@ class Config:
     # External Product API (read-only, provided by the school — see
     # https://github.com/hbtn-edu/hbntory-products-api).
     # Default matches `docker compose up` from that repo, exposed on the host.
-    PRODUCT_API_URL = os.environ.get("PRODUCT_API_URL", "http://localhost:5001")
+    PRODUCT_API_URL = os.environ.get("PRODUCT_API_URL", "http://localhost:5000")
