@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+
+  backoffice:
+    build:
+      context: ./backoffice
+      dockerfile: ../Dockerfile.backoffice
+    container_name: hbntory_backoffice
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=change_me_in_production
+      - DATABASE_URL=sqlite:///hbntory.db
+    volumes:
+      - backoffice_data:/app/instance
+    restart: unless-stopped
+
+  # Provided by the project spec, run from the school-provided image/repo.
+  # Adjust the build context and port once the product-api repo is set up.
+  product_api:
+    build:
+      context: ./product_api_repo
+    container_name: hbntory_product_api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # To be completed by Noham: product_mcp_server and ai_service
+  # product_mcp_server:
+  #   build:
+  #     context: ./product_mcp_server
+  #   container_name: hbntory_mcp_server
+  #   ports:
+  #     - "8100:8100"
+  #   depends_on:
+  #     - product_api
+  #
+  # ai_service:
+  #   build:
+  #     context: ./ai_service
+  #   container_name: hbntory_ai_service
+  #   ports:
+  #     - "8200:8200"
+  #   depends_on:
+  #     - product_mcp_server
+  #     - backoffice
+
+volumes:
+  backoffice_data:
