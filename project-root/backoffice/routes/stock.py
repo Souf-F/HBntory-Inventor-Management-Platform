@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import current_user
 
 from app.models import db, Stock, Role
-from app.routes.middleware import role_required, branch_required
+from routes.middleware import role_required, branch_required
 
 stock_bp = Blueprint("stock", __name__)
 

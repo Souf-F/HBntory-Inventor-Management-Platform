@@ -2,14 +2,13 @@
 HBntory — Flask application factory.
 
 Wires the app, the config, and the shared SQLAlchemy instance together.
-Souf will register the auth/stock/users blueprints here once they're ready
-(see routes/auth.py, routes/stock.py, routes/users.py, routes/middleware.py).
 """
 
 from flask import Flask
+from flask_login import LoginManager
 
 from app.config import Config
-from app.models import db
+from app.models import db, User
 
 
 def create_app(config_class=Config):
@@ -18,12 +17,20 @@ def create_app(config_class=Config):
 
     db.init_app(app)
 
-    # --- Blueprints (registered here once each teammate's routes exist) ---
-    # from app.routes.auth import auth_bp
-    # from app.routes.stock import stock_bp
-    # from app.routes.users import users_bp
-    # app.register_blueprint(auth_bp)
-    # app.register_blueprint(stock_bp)
-    # app.register_blueprint(users_bp)
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # --- Blueprints ---
+    from routes.auth import auth_bp
+    from routes.stock import stock_bp
+    from routes.users import users_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(stock_bp)
+    app.register_blueprint(users_bp)
 
     return app

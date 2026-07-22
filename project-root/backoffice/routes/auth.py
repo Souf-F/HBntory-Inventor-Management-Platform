@@ -9,12 +9,12 @@ auth_bp = Blueprint("auth", __name__)
 
 def hash_password(password):
     """Hash a plain-text password using bcrypt (salted automatically)."""
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password, hashed):
     """Check a plain-text password against a bcrypt hash."""
-    return bcrypt.checkpw(password.encode(), hashed)
+    return bcrypt.checkpw(password.encode(), hashed.encode("utf-8"))
 
 
 @auth_bp.route("/login", methods=["POST"])

@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 
 from app.models import db, User, Role
-from app.routes.auth import hash_password
-from app.routes.middleware import role_required
+from routes.auth import hash_password
+from routes.middleware import role_required
 
 users_bp = Blueprint("users", __name__)
 
