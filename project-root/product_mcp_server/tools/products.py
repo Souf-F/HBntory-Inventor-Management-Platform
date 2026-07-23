@@ -7,6 +7,7 @@ from product_api_client import (
     ProductNotFoundError,
     get_product,
     list_products as _fetch_products,
+    search_products as _search_products,
 )
 
 
@@ -69,6 +70,29 @@ def list_products(category: str | None = None, limit: int = 20) -> list[ProductS
         raise ToolError(f"Could not list products: {exc}")
 
     return [_to_summary(p) for p in raw_products]
+
+
+@mcp.tool()
+def search_products(query: str, limit: int = 20) -> list[ProductSummary]:
+    """
+    Search products by name (or sku, tag, description) using free text.
+
+    Use this to find a product's product_id when you only know its name,
+    for example before calling get_product_details.
+
+    Args:
+        query: free-text search, e.g. a product name.
+        limit: max number of matches to return (default 20).
+
+    Returns an empty list if nothing matches, this is a normal case, not
+    an error: report it as "not found" rather than inventing a product.
+    """
+    try:
+        raw_products = _search_products(query)
+    except ProductAPIError as exc:
+        raise ToolError(f"Could not search products: {exc}")
+
+    return [_to_summary(p) for p in raw_products[:limit]]
 
 
 @mcp.tool()
