@@ -1,2 +1,4 @@
 fastmcp
 requests
+flask-sqlalchemy
+flask-login
