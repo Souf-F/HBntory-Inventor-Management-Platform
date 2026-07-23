@@ -59,9 +59,9 @@ def seed():
 
         # --- Branches ---
         branches = [
-            Branch(name="Metro Paris Nord", location="Paris"),
-            Branch(name="Metro Lyon Part-Dieu", location="Lyon"),
-            Branch(name="Metro Marseille Sud", location="Marseille"),
+            Branch(name="HBntory Paris", location="Paris"),
+            Branch(name="HBntory Lyon", location="Lyon"),
+            Branch(name="HBntory Marseille", location="Marseille"),
         ]
         db.session.add_all(branches)
         db.session.flush()  # assign ids before using them below
