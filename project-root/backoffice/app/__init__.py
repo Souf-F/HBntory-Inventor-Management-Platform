@@ -16,7 +16,12 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    CORS(app, supports_credentials=True, origins=["http://127.0.0.1:5500", "http://localhost:5500"])
+    CORS(app, supports_credentials=True, origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ])
 
     db.init_app(app)
 
