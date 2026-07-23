@@ -48,3 +48,9 @@ def list_products(**filters) -> list[dict]:
 def get_product(sku_or_id: str) -> dict:
     """Raw product details. Raises ProductNotFoundError if unknown."""
     return _get(f"/api/v1/products/{sku_or_id}")
+
+
+def search_products(query: str) -> list[dict]:
+    """Raw product list matching a free-text search (name, sku, tags...)."""
+    data = _get("/api/v1/products/search", params={"q": query})
+    return data.get("results", data if isinstance(data, list) else [])
