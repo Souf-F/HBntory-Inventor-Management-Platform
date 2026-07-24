@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from app.models import db, User, Role
+from app.models import db, User, Role, Branch
 from routes.auth import hash_password
 from routes.middleware import role_required
 
@@ -68,6 +68,12 @@ def update_user(user_id):
 
     data = request.get_json()
 
+    if "username" in data:
+        existing = User.query.filter_by(username=data["username"]).first()
+        if existing is not None and existing.id != user.id:
+            return jsonify({"status": "error", "message": "Username already taken"}), 409
+        user.username = data["username"]
+
     if "password" in data:
         user.password_hash = hash_password(data["password"])
 
@@ -91,3 +97,25 @@ def soft_delete_user(user_id):
     db.session.commit()
 
     return jsonify({"status": "success", "message": "User deactivated"})
+
+
+@users_bp.route("/users/<int:user_id>/reactivate", methods=["PATCH"])
+@role_required(Role.ADMIN)
+def reactivate_user(user_id):
+    """Reactivate a previously soft-deleted user."""
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+
+    user.is_active = True
+    db.session.commit()
+
+    return jsonify({"status": "success", "message": "User reactivated"})
+
+
+@users_bp.route("/branches", methods=["GET"])
+@role_required(Role.ADMIN)
+def list_branches():
+    """List all branches, for populating the admin's branch selector."""
+    branches = Branch.query.all()
+    return jsonify([{"id": b.id, "name": b.name} for b in branches])
