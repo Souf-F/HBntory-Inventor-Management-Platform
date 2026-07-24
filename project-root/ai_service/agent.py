@@ -12,7 +12,7 @@ import os
 from dotenv import load_dotenv
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
-from groq import AsyncGroq
+from groq import APIError, AsyncGroq, RateLimitError
 
 load_dotenv()
 
@@ -22,6 +22,12 @@ GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 # Safety net against a runaway tool-call loop, not expected to be hit in
 # practice for the 4 supported question types.
 MAX_TOOL_ROUNDS = 5
+
+# Groq's free Llama models occasionally emit a malformed tool call (as
+# plain text instead of a structured tool_calls entry), which the API
+# rejects with a 400. This is stochastic: retrying the same request often
+# succeeds on the next sample. Not a sign the request itself is invalid.
+MAX_API_RETRIES = 3
 
 SYSTEM_PROMPT = """You are the HBntory inventory assistant.
 
@@ -49,6 +55,20 @@ If a search or lookup returns no results, state plainly that the
 product or information was not found in the catalog. Do not suggest
 contacting customer service, visiting a website, or any other channel
 you have no information about.
+
+To find where a product is available (question type 2), call
+check_stock with only its product_id, no branch_name: it already
+checks every branch at once. Only use list_branch_stock, and only pass
+a branch_name to check_stock, when the user has explicitly named a
+branch in their question. Never guess or invent a branch name: there
+is no tool to list branch names, so if a branch you were given doesn't
+exist, say so, don't try other guessed names.
+
+Whenever a question involves a quantity (e.g. "I need 5 of X", question
+type 4), always use check_shopping_list with that product_id and
+quantity, even for a single product. check_stock only tells you
+whether a product exists in a branch at all, it cannot tell you if a
+specific quantity is available, never use it for quantity questions.
 
 Always reply in the same language the question was asked in.
 """
@@ -85,11 +105,36 @@ async def ask(question: str) -> str:
         ]
 
         for _ in range(MAX_TOOL_ROUNDS):
-            response = await groq_client.chat.completions.create(
-                model=GROQ_MODEL,
-                messages=messages,
-                tools=tools,
-            )
+            response = None
+            last_error = None
+            for attempt in range(MAX_API_RETRIES):
+                try:
+                    response = await groq_client.chat.completions.create(
+                        model=GROQ_MODEL,
+                        messages=messages,
+                        tools=tools,
+                        # One tool call at a time: the model must wait for a
+                        # real result before it can use it as an argument to
+                        # the next call, instead of guessing a placeholder.
+                        parallel_tool_calls=False,
+                    )
+                    break
+                except RateLimitError as exc:
+                    print(f"[groq rate limit] {exc}")
+                    return (
+                        "Sorry, the assistant is temporarily unavailable "
+                        "(rate limit reached). Please try again later."
+                    )
+                except APIError as exc:
+                    last_error = exc
+                    print(f"[groq error, attempt {attempt + 1}] {exc}")
+
+            if response is None:
+                print(f"[groq error] giving up after {MAX_API_RETRIES} attempts: {last_error}")
+                return (
+                    "Sorry, I ran into a technical problem while processing "
+                    "your question. Please try again."
+                )
             message = response.choices[0].message
 
             if not message.tool_calls:
