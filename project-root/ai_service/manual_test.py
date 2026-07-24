@@ -13,8 +13,19 @@ import asyncio
 from agent import ask
 
 QUESTIONS = [
-    "Où puis-je trouver du café en grains 1kg ?",
+    # Type 1: product details
     "Quel est le prix du 24 inch Compact Monitor ?",
+    # Type 1, product not in the catalog: must say so, not invent a price
+    "Où puis-je trouver du café en grains 1kg ?",
+    # Type 2: where is a product available
+    "Où puis-je trouver le 24 inch Compact Monitor en stock ?",
+    # Type 3: what's available in one branch
+    "Quels produits sont disponibles dans la branche HBntory Paris ?",
+    # Type 3, branch doesn't exist: must say so, not invent a stock list
+    "Quels produits sont disponibles dans la branche de Bordeaux ?",
+    # Type 4: shopping list feasibility
+    "Si j'ai besoin de 5 24 inch Compact Monitor, quelle branche peut me les fournir ?",
+    # Out of scope: must decline, not call any tool
     "Raconte-moi une blague.",
 ]
 
