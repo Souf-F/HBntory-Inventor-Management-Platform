@@ -28,3 +28,47 @@ whether the question fits and how to answer it. This keeps the
 implementation simple, matching the project's two-week scope, at the
 cost of being slightly less predictable than a dedicated classifier if
 the model misjudges an edge-case question.
+
+## Grounded responses (task 4)
+
+The agent never invents a product name, price, description, stock
+quantity, or branch. Every fact in an answer comes from a Product MCP
+Server tool call, never from the model's own knowledge. This is
+enforced in two places:
+
+- The system prompt explicitly forbids inventing data, and requires the
+  agent to say plainly when something wasn't found (no product, no
+  branch, no stock), instead of suggesting an unfounded fallback like
+  "contact customer service".
+- The MCP tools themselves only return real data (see
+  product_mcp_server/README.md): they never fabricate a result, they
+  either return real values or a clear error (`ToolError`) that the
+  agent reports back to the user.
+
+Context is kept minimal on purpose: each tool only returns the fields
+the agent actually needs (e.g. product_id, name, price, not every
+internal field the Product API exposes), so the agent's context never
+contains more internal data than necessary to answer.
+
+### Known limitation: Groq tool-calling reliability
+
+Groq's free Llama models occasionally emit a malformed tool call (as
+plain text instead of a structured call) and briefly try to call two
+tools at once with an invented placeholder argument for the one that
+depends on the other's result. Both are mitigated, not fully
+eliminated:
+
+- `parallel_tool_calls=False` forces the agent to make one tool call
+  at a time, so it can never use a placeholder for a result it hasn't
+  received yet.
+- A malformed generation is retried automatically (`MAX_API_RETRIES`
+  in agent.py), since it's a stochastic sampling issue, not a sign the
+  request itself was invalid: the same call often succeeds on retry.
+
+If every retry fails, or the Groq free tier's daily token quota is
+reached, the agent returns a clear "technical problem, try again"
+message instead of crashing or guessing an answer. This is a
+deliberate trade-off from Decision 7 (architecture.md): a free
+provider's smaller open-source models are less reliable at tool
+calling than a frontier model, mitigated by keeping the tool set small
+and retrying on failure.
