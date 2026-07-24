@@ -53,7 +53,7 @@ async def main() -> None:
         )
 
         # Stock tools, using the values from backoffice/app/seed.py:
-        # HB-MON-2102 -> Metro Paris Nord, quantity 40.
+        # HB-MON-2102 -> HBntory Paris, quantity 40.
         print("\n=== check_stock (all branches) ===")
         result = await client.call_tool("check_stock", {"product_id": "HB-MON-2102"})
         print(result.data)
@@ -61,7 +61,7 @@ async def main() -> None:
         print("\n=== check_stock (one branch) ===")
         result = await client.call_tool(
             "check_stock",
-            {"product_id": "HB-MON-2102", "branch_name": "Metro Paris Nord"},
+            {"product_id": "HB-MON-2102", "branch_name": "HBntory Paris"},
         )
         print(result.data)
 
@@ -76,11 +76,11 @@ async def main() -> None:
 
         print("\n=== list_branch_stock ===")
         result = await client.call_tool(
-            "list_branch_stock", {"branch_name": "Metro Paris Nord"}
+            "list_branch_stock", {"branch_name": "HBntory Paris"}
         )
         print(result.data)
 
-        print("\n=== check_shopping_list (satisfiable in Metro Paris Nord) ===")
+        print("\n=== check_shopping_list (satisfiable in HBntory Paris) ===")
         result = await client.call_tool(
             "check_shopping_list",
             {
