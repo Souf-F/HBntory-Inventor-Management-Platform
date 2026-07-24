@@ -6,6 +6,7 @@ Wires the app, the config, and the shared SQLAlchemy instance together.
 
 from flask import Flask
 from flask_login import LoginManager
+from flask_cors import CORS
 
 from app.config import Config
 from app.models import db, User
@@ -14,6 +15,13 @@ from app.models import db, User
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    CORS(app, supports_credentials=True, origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ])
 
     db.init_app(app)
 
