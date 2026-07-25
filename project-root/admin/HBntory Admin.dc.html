@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<![CDATA[
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    ::placeholder { color: #B4B2A8; }
+  </style>
+</helmet>
+
+<div style="display:flex; min-height:100vh; font-family:'Space Grotesk',sans-serif; background:{{ theme.bg }}; color:{{ theme.text }};">
+
+  <sc-if value="{{ isLoggedOut }}">
+    <div style="flex:1; display:flex; align-items:center; justify-content:center; min-height:100vh;">
+      <div style="width:360px; background:{{ theme.card }}; border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:14px; padding:32px; box-shadow:{{ theme.shadowLg }}; color:{{ theme.text }};">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:28px;">
+          <svg width="34" height="34" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="70" cy="70" r="66" fill="#f4a11e" stroke="#16130F" stroke-width="3"></circle>
+            <circle cx="70" cy="70" r="50" fill="#ff4d8d" stroke="#16130F" stroke-width="2.5"></circle>
+            <circle cx="70" cy="70" r="34" fill="#fdf6e3"></circle>
+            <text x="70" y="80" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="34" fill="#16130F">H</text>
+          </svg>
+          <div style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:19px;">
+            HB<span style="color:#F0208B;">ntory</span> <span style="color:#9A988F; font-size:12px; font-weight:500;">Admin</span>
+          </div>
+        </div>
+        <h1 style="font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:700; margin:0 0 6px;">Connexion</h1>
+        <p style="color:#6B6A63; font-size:13px; margin:0 0 22px;">Accès réservé aux administrateurs.</p>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Nom d'utilisateur</span>
+            <input value="{{ loginForm.username }}" onChange="{{ onLoginUsernameChange }}" placeholder="admin" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Mot de passe</span>
+            <input type="password" value="{{ loginForm.password }}" onChange="{{ onLoginPasswordChange }}" placeholder="••••••••" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <sc-if value="{{ loginError }}">
+            <div style="font-size:13px; color:{{ theme.danger }}; background:{{ theme.dangerBg }}; border-radius:8px; padding:10px 12px;">{{ loginError }}</div>
+          </sc-if>
+          <button onClick="{{ submitLogin }}" style="background:#7B2FF7; color:#fff; border:{{ theme.borderW }} solid {{ theme.border }}; padding:10px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; margin-top:4px; box-shadow:{{ theme.shadowSm }};" style-hover="background:#6A22DE;">Se connecter</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isLoggedIn }}">
+  <aside style="width:230px; flex-shrink:0; background:{{ theme.card }}; border-right:2px solid {{ theme.border }}; padding:20px 16px; display:flex; flex-direction:column; justify-content:space-between; color:{{ theme.text }};">
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:28px; padding:0 2px;">
+        <svg width="26" height="26" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="70" cy="70" r="66" fill="#f4a11e" stroke="#16130F" stroke-width="3"></circle>
+          <circle cx="70" cy="70" r="50" fill="#ff4d8d" stroke="#16130F" stroke-width="2.5"></circle>
+          <circle cx="70" cy="70" r="34" fill="#fdf6e3"></circle>
+          <text x="70" y="80" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="34" fill="#16130F">H</text>
+          <circle cx="20" cy="20" r="6" fill="#4dd9d0" stroke="#16130F" stroke-width="2"></circle>
+          <circle cx="120" cy="120" r="6" fill="#7c4dff" stroke="#16130F" stroke-width="2"></circle>
+        </svg>
+        <div style="font-family:'Baloo 2',sans-serif; font-weight:800; font-size:17px; line-height:1.1;">
+          HB<span style="color:#F0208B;">ntory</span>
+        </div>
+      </div>
+      <nav style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; font-size:14px; font-weight:700; background:{{ theme.navBg }}; color:{{ theme.navText }}; border:{{ theme.borderW }} solid {{ theme.border }}; cursor:default; box-shadow:{{ theme.shadowSm }};">
+          <span style="width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;">👤</span>Utilisateurs
+        </div>
+      </nav>
+    </div>
+    <div style="font-size:11px; color:{{ theme.muted }}; border-top:2px solid {{ theme.border }}; padding-top:12px; line-height:1.6; display:flex; align-items:center; justify-content:space-between;">
+      <div>Site admin<br>admin · session active
+      <a onClick="{{ logout }}" style="display:block; margin-top:6px; color:#7B2FF7; cursor:pointer; font-weight:600;" style-hover="text-decoration:underline;">Se déconnecter</a>
+      </div>
+      <button onClick="{{ toggleDark }}" aria-label="Changer de thème" style="width:40px; height:40px; border-radius:50%; border:2px solid {{ theme.border }}; background:#7B2FF7; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;" style-hover="opacity:0.85;">{{ darkToggleIcon }}</button>
+    </div>
+  </aside>
+
+  <main style="flex:1; padding:36px 44px; max-width:1040px;">
+
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+        <div>
+          <h1 style="font-family:'Baloo 2',sans-serif; font-size:26px; font-weight:700; margin:0;">Admin</h1>
+        </div>
+        <button onClick="{{ goToCreate }}" style="background:#7B2FF7; color:#fff; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:{{ theme.shadowSm }};" style-hover="background:#6A22DE;">+ Créer un utilisateur</button>
+      </div>
+
+      <div style="border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:12px; overflow:hidden; box-shadow:{{ theme.shadowMd }};">
+      <table style="width:100%; border-collapse:collapse; background:{{ theme.card }};">
+        <thead>
+          <tr>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Utilisateur</th>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Rôle</th>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Branche</th>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Statut</th>
+            <th style="padding:12px 18px; border-bottom:2px solid {{ theme.border }};"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ users }}" as="u" hint-placeholder-count="4">
+            <tr style="opacity:{{ u.rowOpacity }};">
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; font-weight:600; color:{{ u.textColor }};">{{ u.username }}</td>
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }};">
+                <span style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:{{ u.roleBg }}; color:{{ u.roleColor }}; border:1.5px solid currentColor;">
+                  <span style="width:6px; height:6px; border-radius:50%; background:currentColor;"></span>{{ u.roleLabel }}
+                </span>
+              </td>
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; color:{{ u.textColor }}; white-space:nowrap;">{{ u.branchLabel }}</td>
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; color:{{ u.statusColor }}; font-weight:600;">{{ u.statusLabel }}</td>
+              <td style="padding:14px 18px; font-size:13px; border-bottom:1px solid {{ theme.rowBorder }}; text-align:right; white-space:nowrap;">
+                <sc-if value="{{ u.canManage }}">
+                  <a onClick="{{ u.onEdit }}" style="color:{{ theme.accent }}; font-weight:600; cursor:pointer; margin-right:14px;" style-hover="text-decoration:underline;">Modifier</a>
+                  <sc-if value="{{ u.isActive }}">
+                    <a onClick="{{ u.onDeactivate }}" style="color:{{ theme.danger }}; font-weight:600; cursor:pointer;" style-hover="text-decoration:underline;">Désactiver</a>
+                  </sc-if>
+                  <sc-if value="{{ u.isDisabled }}">
+                    <a onClick="{{ u.onReactivate }}" style="color:{{ theme.success }}; font-weight:600; cursor:pointer;" style-hover="text-decoration:underline;">Réactiver</a>
+                  </sc-if>
+                </sc-if>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCreate }}">
+      <div style="max-width:480px;">
+        <div style="margin-bottom:24px;">
+          <a onClick="{{ goToList }}" style="font-size:13px; color:{{ theme.label }}; cursor:pointer;" style-hover="color:{{ theme.text }};">← Utilisateurs</a>
+          <h1 style="font-family:'Baloo 2',sans-serif; font-size:24px; font-weight:700; margin:10px 0 0;">Créer un utilisateur</h1>
+          <p style="color:{{ theme.label }}; font-size:14px; margin-top:6px;">Ce compte sera créé en tant qu'employé, rattaché à une branche.</p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px; background:{{ theme.card }}; border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:12px; padding:24px; box-shadow:{{ theme.shadowMd }}; color:{{ theme.text }};">
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Nom d'utilisateur</span>
+            <input value="{{ createForm.username }}" onChange="{{ onCreateUsernameChange }}" placeholder="ex. employee4" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Mot de passe initial</span>
+            <input type="password" value="{{ createForm.password }}" onChange="{{ onCreatePasswordChange }}" placeholder="••••••••" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Branche assignée</span>
+            <select value="{{ createForm.branch }}" onChange="{{ onCreateBranchChange }}" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};">
+              <option value="">Choisir une branche…</option>
+              <sc-for list="{{ branches }}" as="b" hint-placeholder-count="3">
+                <option value="{{ b.id }}">{{ b.name }}</option>
+              </sc-for>
+            </select>
+          </label>
+
+          <sc-if value="{{ createError }}">
+            <div style="font-size:13px; color:{{ theme.danger }}; background:{{ theme.dangerBg }}; border-radius:8px; padding:10px 12px;">{{ createError }}</div>
+          </sc-if>
+
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <button onClick="{{ submitCreate }}" style="background:#7B2FF7; color:#fff; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:{{ theme.shadowSm }};" style-hover="background:#6A22DE;">Créer l'utilisateur</button>
+            <button onClick="{{ goToList }}" style="background:transparent; color:{{ theme.text }}; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer;" style-hover="background:#F5F4F0;">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEdit }}">
+      <div style="max-width:480px;">
+        <div style="margin-bottom:24px;">
+          <a onClick="{{ goToList }}" style="font-size:13px; color:{{ theme.label }}; cursor:pointer;" style-hover="color:{{ theme.text }};">← Utilisateurs</a>
+          <h1 style="font-family:'Baloo 2',sans-serif; font-size:24px; font-weight:700; margin:10px 0 0;">Modifier {{ editingUser.username }}</h1>
+          <p style="color:{{ theme.label }}; font-size:14px; margin-top:6px;">Compte employé</p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px; background:{{ theme.card }}; border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:12px; padding:24px; margin-bottom:20px; box-shadow:{{ theme.shadowMd }}; color:{{ theme.text }};">
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Nom d'utilisateur</span>
+            <input value="{{ editForm.username }}" onChange="{{ onEditUsernameChange }}" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Branche assignée</span>
+            <select value="{{ editForm.branch_id }}" onChange="{{ onEditBranchChange }}" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};">
+              <sc-for list="{{ branches }}" as="b" hint-placeholder-count="3">
+                <option value="{{ b.id }}">{{ b.name }}</option>
+              </sc-for>
+            </select>
+          </label>
+          <sc-if value="{{ editError }}">
+            <div style="font-size:13px; color:{{ theme.danger }}; background:{{ theme.dangerBg }}; border-radius:8px; padding:10px 12px;">{{ editError }}</div>
+          </sc-if>
+          <div>
+            <button onClick="{{ submitEdit }}" style="background:#7B2FF7; color:#fff; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:{{ theme.shadowSm }};" style-hover="background:#6A22DE;">Enregistrer les modifications</button>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px; background:{{ theme.card }}; border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:12px; padding:24px; margin-bottom:20px; box-shadow:{{ theme.shadowMd }}; color:{{ theme.text }};">
+          <div style="font-size:13px; font-weight:600; color:#6B6A63;">Changer le mot de passe</div>
+          <input type="password" value="{{ editForm.newPassword }}" onChange="{{ onEditPasswordChange }}" placeholder="Nouveau mot de passe" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          <div>
+            <button onClick="{{ submitPassword }}" style="background:{{ theme.text }}; color:{{ theme.bg }}; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:{{ theme.shadowSm }};" style-hover="opacity:0.85;">Mettre à jour le mot de passe</button>
+          </div>
+        </div>
+
+        <div style="background:{{ theme.dangerBg }}; border:1px solid {{ theme.danger }}; border-radius:12px; padding:24px;">
+          <div style="font-size:13px; font-weight:600; color:{{ theme.danger }}; margin-bottom:6px;">Zone sensible</div>
+          <p style="font-size:13px; color:{{ theme.label }}; margin:0 0 14px; line-height:1.5;">Désactiver ce compte l'empêchera immédiatement de se connecter. Cette action doit être confirmée.</p>
+          <button onClick="{{ requestDeleteFromEdit }}" style="background:{{ theme.card }}; color:{{ theme.danger }}; border:1px solid {{ theme.danger }}; padding:9px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer;" style-hover="opacity:0.85;">Désactiver ce compte</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ toast }}">
+      <div style="position:fixed; bottom:28px; right:32px; background:{{ theme.text }}; color:{{ theme.bg }}; padding:12px 20px; border-radius:8px; font-size:14px; font-weight:500; border:1px solid {{ theme.border }}; box-shadow:{{ theme.shadowSm }};">{{ toast }}</div>
+    </sc-if>
+    <sc-if value="{{ networkError }}">
+      <div style="position:fixed; bottom:28px; left:270px; background:{{ theme.danger }}; color:#fff; padding:12px 20px; border-radius:8px; font-size:14px; font-weight:500;">{{ networkError }}</div>
+    </sc-if>
+
+  </main>
+
+  <sc-if value="{{ deleteTarget }}">
+    <div style="position:fixed; inset:0; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; z-index:100;">
+      <div style="background:{{ theme.card }}; border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:14px; padding:28px; width:380px; box-shadow:{{ theme.shadowLg }}; color:{{ theme.text }};">
+        <div style="font-family:'Baloo 2',sans-serif; font-size:19px; font-weight:700; margin-bottom:10px;">Désactiver {{ deleteTarget.username }} ?</div>
+        <p style="font-size:14px; color:#6B6A63; line-height:1.6; margin:0 0 22px;">Ce compte ne pourra plus se connecter. Son historique reste conservé, mais cette action ne peut pas être annulée depuis cette interface.</p>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onClick="{{ cancelDelete }}" style="background:transparent; color:{{ theme.text }}; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 15px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer;" style-hover="background:#F5F4F0;">Annuler</button>
+          <button onClick="{{ confirmDelete }}" style="background:{{ theme.danger }}; color:{{ theme.bg }}; border:{{ theme.borderW }} solid {{ theme.border }}; padding:9px 15px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:{{ theme.shadowSm }};" style-hover="opacity:0.85;">Désactiver ce compte</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  </sc-if>
+
+</div>
+]]>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const API_BASE = 'http://localhost:5000';
+
+class Component extends DCLogic {
+  getBranches() {
+    // TODO: replace with a real GET /branches call once that route is confirmed.
+    return [
+      { id: 1, name: 'HBntory Paris' },
+      { id: 2, name: 'HBntory Lyon' },
+      { id: 3, name: 'HBntory Marseille' },
+    ];
+  }
+
+  state = {
+    dark: false,
+    loggedIn: false,
+    loginForm: { username: '', password: '' },
+    loginError: '',
+    view: 'list',
+    users: [],
+    editingId: null,
+    createForm: { username: '', password: '', branch_id: '' },
+    createError: '',
+    editForm: { username: '', branch_id: '', newPassword: '' },
+    editError: '',
+    deleteTargetId: null,
+    toast: null,
+    networkError: null,
+  };
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+
+  showNetworkError(msg) {
+    this.setState({ networkError: msg || "Le serveur ne répond pas." });
+    setTimeout(() => this.setState({ networkError: null }), 4000);
+  }
+
+  async api(path, options) {
+    try {
+      const res = await fetch(API_BASE + path, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      let data = null;
+      try { data = await res.json(); } catch (e) {}
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      this.showNetworkError("Impossible de contacter le serveur.");
+      return { ok: false, status: 0, data: null };
+    }
+  }
+
+  async loadUsers() {
+    const res = await this.api('/users', { method: 'GET' });
+    if (res.ok && res.data) {
+      this.setState({ users: Array.isArray(res.data) ? res.data : (res.data.users || []) });
+    } else if (res.status !== 0) {
+      this.showNetworkError("Impossible de charger les utilisateurs.");
+    }
+  }
+
+  onLoginUsernameChange = (e) => this.setState(s => ({ loginForm: { ...s.loginForm, username: e.target.value } }));
+  onLoginPasswordChange = (e) => this.setState(s => ({ loginForm: { ...s.loginForm, password: e.target.value } }));
+
+  submitLogin = async () => {
+    const { username, password } = this.state.loginForm;
+    if (!username.trim() || !password.trim()) {
+      this.setState({ loginError: "Nom d'utilisateur et mot de passe requis." });
+      return;
+    }
+    const res = await this.api('/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    if (res.status === 0) {
+      this.setState({ loginError: "Le serveur ne répond pas." });
+      return;
+    }
+    if (res.data && res.data.status === 'success') {
+      this.setState({ loggedIn: true, loginError: '', loginForm: { username: '', password: '' } });
+      this.loadUsers();
+    } else {
+      this.setState({ loginError: (res.data && (res.data.message || res.data.error)) || "Identifiants incorrects." });
+    }
+  };
+
+  logout = () => this.setState({ loggedIn: false, view: 'list' });
+  toggleDark = () => this.setState(s => ({ dark: !s.dark }));
+
+  goToList = () => this.setState({ view: 'list', createError: '', editError: '' });
+  goToCreate = () => this.setState({ view: 'create', createForm: { username: '', password: '', branch_id: '' }, createError: '' });
+  goToEdit = (user) => this.setState({
+    view: 'edit',
+    editingId: user.id,
+    editForm: { username: user.username, branch_id: user.branch_id || '', newPassword: '' },
+    editError: '',
+  });
+
+  onCreateUsernameChange = (e) => this.setState(s => ({ createForm: { ...s.createForm, username: e.target.value } }));
+  onCreatePasswordChange = (e) => this.setState(s => ({ createForm: { ...s.createForm, password: e.target.value } }));
+  onCreateBranchChange = (e) => this.setState(s => ({ createForm: { ...s.createForm, branch_id: e.target.value } }));
+
+  onEditUsernameChange = (e) => this.setState(s => ({ editForm: { ...s.editForm, username: e.target.value } }));
+  onEditBranchChange = (e) => this.setState(s => ({ editForm: { ...s.editForm, branch_id: e.target.value } }));
+  onEditPasswordChange = (e) => this.setState(s => ({ editForm: { ...s.editForm, newPassword: e.target.value } }));
+
+  submitCreate = async () => {
+    const username = this.state.createForm.username;
+    const password = this.state.createForm.password;
+    const branch_id = this.state.createForm.branch_id;
+    if (!username.trim() || !password.trim() || !branch_id) {
+      this.setState({ createError: "Nom d'utilisateur, mot de passe et branche sont obligatoires." });
+      return;
+    }
+    const res = await this.api('/users', {
+      method: 'POST',
+      body: JSON.stringify({ username: username.trim(), password, branch_id: parseInt(branch_id, 10) }),
+    });
+    if (res.status === 0) {
+      this.setState({ createError: "Le serveur ne répond pas." });
+      return;
+    }
+    if (res.ok) {
+      this.setState({ view: 'list', createError: '' });
+      this.loadUsers();
+      this.showToast('Utilisateur créé.');
+    } else {
+      this.setState({ createError: (res.data && (res.data.message || res.data.error)) || "Erreur lors de la création." });
+    }
+  };
+
+  submitEdit = async () => {
+    const branch_id = this.state.editForm.branch_id;
+    if (!branch_id) {
+      this.setState({ editError: 'Branche obligatoire.' });
+      return;
+    }
+    const editingId = this.state.editingId;
+    const res = await this.api('/users/' + editingId, {
+      method: 'PATCH',
+      body: JSON.stringify({ branch_id: parseInt(branch_id, 10) }),
+    });
+    if (res.status === 0) {
+      this.setState({ editError: "Le serveur ne répond pas." });
+      return;
+    }
+    if (res.ok) {
+      this.setState({ view: 'list', editError: '' });
+      this.loadUsers();
+      this.showToast('Modifications enregistrées.');
+    } else {
+      this.setState({ editError: (res.data && (res.data.message || res.data.error)) || "Erreur lors de la modification." });
+    }
+  };
+
+  submitPassword = async () => {
+    const newPassword = this.state.editForm.newPassword;
+    if (!newPassword.trim()) return;
+    const res = await this.api('/users/' + this.state.editingId, {
+      method: 'PATCH',
+      body: JSON.stringify({ password: newPassword }),
+    });
+    if (res.ok) {
+      this.setState(s => ({ editForm: { ...s.editForm, newPassword: '' } }));
+      this.showToast('Mot de passe mis à jour.');
+    } else if (res.status !== 0) {
+      this.showNetworkError("Erreur lors de la mise à jour du mot de passe.");
+    }
+  };
+
+  reactivate = async (id) => {
+    const res = await this.api('/users/' + id + '/reactivate', { method: 'PATCH' });
+    if (res.ok) {
+      this.loadUsers();
+      this.showToast('Compte réactivé.');
+    } else if (res.status !== 0) {
+      this.showNetworkError("Erreur lors de la réactivation.");
+    }
+  };
+
+  requestDelete = (id) => this.setState({ deleteTargetId: id });
+  requestDeleteFromEdit = () => this.setState({ deleteTargetId: this.state.editingId });
+  cancelDelete = () => this.setState({ deleteTargetId: null });
+  confirmDelete = async () => {
+    const id = this.state.deleteTargetId;
+    const res = await this.api('/users/' + id, { method: 'DELETE' });
+    if (res.ok) {
+      this.setState({ deleteTargetId: null, view: 'list' });
+      this.loadUsers();
+      this.showToast('Compte désactivé.');
+    } else if (res.status !== 0) {
+      this.setState({ deleteTargetId: null });
+      this.showNetworkError("Erreur lors de la désactivation.");
+    }
+  };
+
+  renderVals() {
+    const view = this.state.view;
+    const users = this.state.users;
+    const editingUser = users.find(u => u.id === this.state.editingId) || { username: '' };
+    const deleteTarget = users.find(u => u.id === this.state.deleteTargetId) || null;
+
+    const dark = this.state.dark;
+    const theme = dark ? {
+      bg: '#17171B', card: '#1E1E24', text: '#EDEDEF', border: '#2C2C33',
+      muted: '#9B9BA3', label: '#9B9BA3', inputBg: '#1C1C21', rowBorder: '#2C2C33',
+      accent: '#7B2FF7', navBg: '#7B2FF7', navText: '#fff',
+      success: '#4ADE80', danger: '#F87171', dangerBg: '#1E1E24',
+      roleAdminBg: '#2A1F4D', roleAdminColor: '#7B2FF7',
+      roleEmployeeBg: '#12332B', roleEmployeeColor: '#4ADE80',
+      statusActive: '#4ADE80', statusDisabled: '#6B6B72',
+      borderW: '1px', shadowLg: 'none', shadowMd: 'none', shadowSm: 'none',
+    } : {
+      bg: '#F7F3E9', card: '#FFFFFF', text: '#16130F', border: '#16130F',
+      muted: '#9A988F', label: '#6B6A63', inputBg: '#FFFFFF', rowBorder: '#F1EFE9',
+      accent: '#7B2FF7', navBg: '#F0208B', navText: '#fff',
+      success: '#0F6E56', danger: '#B4472F', dangerBg: '#FBEEEA',
+      roleAdminBg: '#F3EEFF', roleAdminColor: '#7B2FF7',
+      roleEmployeeBg: '#E4F8F4', roleEmployeeColor: '#0F6E56',
+      statusActive: '#0F6E56', statusDisabled: '#9A988F',
+      borderW: '2px', shadowLg: '5px 5px 0 #16130F', shadowMd: '4px 4px 0 #16130F', shadowSm: '3px 3px 0 #16130F',
+    };
+
+    const branchMap = Object.fromEntries(this.getBranches().map(b => [b.id, b.name]));
+
+    const rows = users.map(u => ({
+      username: u.username,
+      rowOpacity: u.is_active ? 1 : 0.55,
+      textColor: u.is_active ? theme.text : theme.muted,
+      roleLabel: u.role === 'admin' ? 'Admin' : 'Employé',
+      roleBg: u.role === 'admin' ? theme.roleAdminBg : theme.roleEmployeeBg,
+      roleColor: u.role === 'admin' ? theme.roleAdminColor : theme.roleEmployeeColor,
+      branchLabel: u.branch_id ? (branchMap[u.branch_id] || '—') : '—',
+      statusLabel: u.is_active ? 'Actif' : 'Désactivé',
+      statusColor: u.is_active ? theme.statusActive : theme.statusDisabled,
+      isActive: u.is_active,
+      isDisabled: !u.is_active,
+      canManage: u.role !== 'admin',
+      onEdit: () => this.goToEdit(u),
+      onDeactivate: () => this.requestDelete(u.id),
+      onReactivate: () => this.reactivate(u.id),
+    }));
+
+    return {
+      theme: theme,
+      darkToggleIcon: dark ? '☀' : '☾',
+      toggleDark: this.toggleDark,
+      isLoggedIn: this.state.loggedIn,
+      isLoggedOut: !this.state.loggedIn,
+      loginForm: this.state.loginForm,
+      loginError: this.state.loginError,
+      onLoginUsernameChange: this.onLoginUsernameChange,
+      onLoginPasswordChange: this.onLoginPasswordChange,
+      submitLogin: this.submitLogin,
+      logout: this.logout,
+      isList: view === 'list',
+      isCreate: view === 'create',
+      isEdit: view === 'edit',
+      users: rows,
+      branches: this.getBranches(),
+      createForm: this.state.createForm,
+      createError: this.state.createError,
+      editForm: this.state.editForm,
+      editError: this.state.editError,
+      editingUser: editingUser,
+      deleteTarget: deleteTarget,
+      toast: this.state.toast,
+      networkError: this.state.networkError,
+      goToList: this.goToList,
+      goToCreate: this.goToCreate,
+      onCreateUsernameChange: this.onCreateUsernameChange,
+      onCreatePasswordChange: this.onCreatePasswordChange,
+      onCreateBranchChange: this.onCreateBranchChange,
+      onEditUsernameChange: this.onEditUsernameChange,
+      onEditBranchChange: this.onEditBranchChange,
+      onEditPasswordChange: this.onEditPasswordChange,
+      submitCreate: this.submitCreate,
+      submitEdit: this.submitEdit,
+      submitPassword: this.submitPassword,
+      requestDeleteFromEdit: this.requestDeleteFromEdit,
+      cancelDelete: this.cancelDelete,
+      confirmDelete: this.confirmDelete,
+    };
+  }
+}
+</script>
+</body>
+</html>
