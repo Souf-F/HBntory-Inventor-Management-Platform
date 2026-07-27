@@ -156,7 +156,7 @@ erDiagram
 | Database | SQLite | No server configuration needed, sufficient for the project's scope |
 | Authentication | Flask-Login (sessions) | Classic internal use case, simpler to implement than JWT tokens in this context |
 | Password hashing | bcrypt | Automatic salting, tunable cost factor, recognized standard for password storage |
-| Public client communication | REST (not WebSocket) | Each question is handled independently, no conversation history to maintain |
+| Public client communication | REST | Each question is handled independently, no conversation history to maintain |
 | AI ↔ Product API bridge | MCP server (FastMCP) | Required by the spec, cleanly separates data access from the agent's logic |
 | Backoffice interface | Vanilla HTML / CSS / JavaScript | No framework needed for the project's scope |
 | Public client interface | Vanilla HTML / CSS / JavaScript | Simple chat page, no authentication |
@@ -304,13 +304,13 @@ The public client (`client_web/index.html`) and the admin interface (`admin/HBnt
 
 ## Tests performed
 
-**13 functional tests** covering authentication, roles, stock operations, and account management — all passed.
+**13 functional tests** covering authentication, roles, stock operations, and account management, all passed.
 
 **7 security tests** covering SQL injection, role bypass via a stale session, mass assignment, type confusion, and unauthorized resource access — all passed, no exploitable flaw identified on the Backoffice side.
 
 One point of attention was identified for Task 6 (Client Web Interface): data displayed on the client side should be escaped using `textContent` rather than `innerHTML`, to avoid any risk of stored XSS originating from data entered through the Backoffice.
 
-**Manual integration tests (Sagal)**: 9 verifications run against the live backend and the external Product API, all passed —
+**Manual integration tests (Sagal)**: 9 verifications run against the live backend and the external Product API, all passed.
 
 1. Login with correct credentials
 2. Login rejected with incorrect password
@@ -322,4 +322,4 @@ One point of attention was identified for Task 6 (Client Web Interface): data di
 8. `get_product()` against the real Product API
 9. `list_products()` against the real Product API
 
-**AI Service / MCP Server tests (Noham)**: ~50 manual and automated checks run across the MCP tools and the AI agent's grounding behavior — still in progress, exact breakdown to be documented in `product_mcp_server/README.md` / `ai_service/README.md`.
+**AI Service / MCP Server tests (Noham)**: ~50 manual and automated checks run across the MCP tools and the AI agent's grounding behavior, still in progress, exact breakdown to be documented in `product_mcp_server/README.md` / `ai_service/README.md`.

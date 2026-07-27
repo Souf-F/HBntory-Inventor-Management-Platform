@@ -1,6 +1,6 @@
 # HBntory — Architecture
 
-Team project: Sagal-Louise Haider, Souf, Noham
+Team project: Souf, Noham, Sagal
 
 **Roles**: Souf: auth & Backoffice security · Sagal: Backoffice data (DB, config, seed, Product API integration) · Noham: MCP Server & AI Query Service
 
