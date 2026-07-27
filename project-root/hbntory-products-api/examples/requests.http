@@ -1,0 +1,31 @@
+@baseUrl = http://localhost:5001
+
+### Health check
+GET {{baseUrl}}/health
+
+### List products
+GET {{baseUrl}}/api/v1/products?limit=10&offset=0
+
+### Search by text
+GET {{baseUrl}}/api/v1/products/search?q=keyboard
+
+### Filter by category
+GET {{baseUrl}}/api/v1/products?category=Accessories&limit=10
+
+### Filter by supplier
+GET {{baseUrl}}/api/v1/products?supplier_id=SUP-HBT-001
+
+### Filter by price range
+GET {{baseUrl}}/api/v1/products?min_price=50&max_price=200&sort=unit_price
+
+### Product detail by SKU
+GET {{baseUrl}}/api/v1/products/HB-LAP-1001
+
+### Product detail by numeric id
+GET {{baseUrl}}/api/v1/products/1
+
+### Simulate external service delay
+GET {{baseUrl}}/api/v1/products?simulate_delay_ms=750
+
+### Simulate external service failure
+GET {{baseUrl}}/api/v1/products?force_error=true
