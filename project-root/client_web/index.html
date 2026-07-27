@@ -265,7 +265,10 @@
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;">
             <sc-for list="{{ catalogCards }}" as="p" hint-placeholder-count="6">
               <div style="background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);overflow:hidden;">
-                <div style="{{ p.thumbStyle }}">{{ p.initial }}</div>
+                <div style="{{ p.thumbStyle }}">
+                  {{ p.initial }}
+                  <img src="{{ p.imageSrc }}" alt="" onerror="this.style.display='none'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;" />
+                </div>
                 <div style="padding:16px;">
                   <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-bottom:4px;">{{ p.name }}</div>
                   <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Réf. {{ p.id }} · {{ p.branch }}</div>
@@ -363,13 +366,13 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900},
-  &quot;chatApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://api.hbntory.exemple.fr/v1/assistant/ask&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
-  &quot;productsApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://api.hbntory.exemple.fr/v1/catalogue/produits&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
+  &quot;chatApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:8100/ask&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
+  &quot;productsApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:5001/api/v1/products?limit=100&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
   &quot;showDemoSection&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Configuration&quot;}
 }">
 class Component extends DCLogic {
-  static CHAT_API_URL = "https://api.hbntory.exemple.fr/v1/assistant/ask";
-  static PRODUCTS_API_URL = "https://api.hbntory.exemple.fr/v1/catalogue/produits";
+  static CHAT_API_URL = "http://127.0.0.1:8100/ask";
+  static PRODUCTS_API_URL = "http://127.0.0.1:5001/api/v1/products?limit=100";
 
   state = {
     page: "dashboard",
@@ -496,7 +499,7 @@ class Component extends DCLogic {
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
-      const list = Array.isArray(data) ? data : (data.products || data.items || []);
+      const list = Array.isArray(data) ? data : (data.results || data.products || data.items || []);
       this.setState({ catalogState: "loaded", catalogProducts: list });
     } catch (err) {
       this.setState({ catalogState: "error", catalogError: "Le service catalogue est momentanément indisponible. Vérifiez la connexion ou réessayez." });
@@ -510,14 +513,36 @@ class Component extends DCLogic {
     const isDesktop = !isMobile;
 
     const palette = ["#F0208B", "#17C3D6", "#F5B700", "#FF5A1F", "#7B2FF7"];
+    // The Product API never returns product images (see the sample response —
+    // only identifiers, names, categories, prices, tags). Rather than call an
+    // external image service that could fail during the demo, each category
+    // gets a fixed representative icon instead.
+    const CATEGORY_ICONS = {
+      "Displays": "\uD83D\uDDA5\uFE0F",
+      "Networking": "\uD83D\uDD0C",
+      "Operations": "\uD83D\uDCE6",
+      "Development Kits": "\uD83D\uDD27",
+      "Accessories": "\u2328\uFE0F",
+      "Furniture": "\uD83E\uDE91",
+      "Storage": "\uD83D\uDCBE",
+      "Video": "\uD83D\uDCF9",
+      "Laptops": "\uD83D\uDCBB",
+      "Mobile Devices": "\uD83D\uDCF1"
+    };
     const catalogCards = (s.catalogProducts || []).map((p, i) => {
-      const stock = p.stock || 0;
+      // The Product API never returns stock (by design, see architecture.md
+      // golden rule) — stock only exists per branch, in our own database.
+      // Show product info here; use the Assistant to ask about availability.
       return {
-        id: p.id, name: p.name || "Produit", branch: p.branch || "—",
-        initial: (p.name || "?").charAt(0).toUpperCase(),
-        thumbStyle: { height: "96px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: "34px", color: "#fff", background: palette[i % palette.length] },
-        stockLabel: stock > 10 ? ("En stock (" + stock + ")") : (stock > 0 ? ("Stock faible (" + stock + ")") : "Rupture de stock"),
-        badgeStyle: { display: "inline-block", padding: "4px 10px", fontSize: "12px", fontWeight: 700, border: "2px solid #16130F", background: stock > 10 ? "#C9F2D6" : (stock > 0 ? "#FFE8A3" : "#FFD0D8") }
+        id: p.sku || p.id, name: p.name || "Produit", branch: p.category || "—",
+        initial: CATEGORY_ICONS[p.category] || "\uD83D\uDCE6",
+        // Looks for a manually-added image at assets/products/<sku>.png.
+        // If it 404s, the inline onerror above hides it and the category
+        // icon underneath stays visible — no broken-image icon shown.
+        imageSrc: "assets/products/" + (p.sku || p.id) + ".png",
+        thumbStyle: { position: "relative", height: "150px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "40px", background: palette[i % palette.length], overflow: "hidden" },
+        stockLabel: p.unit_price != null ? (p.unit_price + " " + (p.currency || "")) : "Prix non communiqué",
+        badgeStyle: { display: "inline-block", padding: "4px 10px", fontSize: "12px", fontWeight: 700, border: "2px solid #16130F", background: "#E9EAF0", color: "#16130F" }
       };
     });
 
@@ -539,10 +564,10 @@ class Component extends DCLogic {
     });
 
     const chips = [
-      { label: "Où puis-je trouver le produit X ?", onClick: () => this.handleSend("Où puis-je trouver le produit X ?") },
-      { label: "Quels produits sont disponibles dans la branche Y ?", onClick: () => this.handleSend("Quels produits sont disponibles dans la branche Y ?") },
-      { label: "Il me faut 3 unités de X, 2 de Y et 4 de Z, dans quelle(s) branche(s) puis-je tout trouver ?", onClick: () => this.handleSend("Il me faut 3 unités de X, 2 de Y et 4 de Z, dans quelle(s) branche(s) puis-je tout trouver ?") },
-      { label: "Donne-moi les détails du produit XX", onClick: () => this.handleSend("Donne-moi les détails du produit XX") }
+      { label: "Où puis-je trouver le 24 inch Compact Monitor ?", onClick: () => this.handleSend("Où puis-je trouver le 24 inch Compact Monitor ?") },
+      { label: "Quels produits sont disponibles à Metro Paris Nord ?", onClick: () => this.handleSend("Quels produits sont disponibles à la branche Metro Paris Nord ?") },
+      { label: "Il me faut 3 unités de 8-Port Managed Switch et 2 de Barcode Scanner USB, dans quelle(s) branche(s) puis-je tout trouver ?", onClick: () => this.handleSend("Il me faut 3 unités de 8-Port Managed Switch et 2 de Barcode Scanner USB, dans quelle(s) branche(s) puis-je tout trouver ?") },
+      { label: "Donne-moi les détails du produit HB-MON-2102", onClick: () => this.handleSend("Donne-moi les détails du produit HB-MON-2102") }
     ];
 
     const isDark = s.isDark;
