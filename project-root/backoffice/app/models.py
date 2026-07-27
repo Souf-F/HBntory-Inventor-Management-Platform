@@ -18,9 +18,22 @@ import enum
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy import CheckConstraint, UniqueConstraint
+from sqlalchemy import CheckConstraint, UniqueConstraint, event
+from sqlalchemy.engine import Engine
 
 db = SQLAlchemy()
+
+
+# SQLite does not enforce FOREIGN KEY constraints by default, even though
+# they are declared below (branch_id -> branches.id). Without this, a row
+# could reference a branch_id that doesn't exist in the branches table,
+# silently, with no error. This listener turns the check on for every new
+# SQLite connection opened by SQLAlchemy.
+@event.listens_for(Engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 class Role(enum.Enum):

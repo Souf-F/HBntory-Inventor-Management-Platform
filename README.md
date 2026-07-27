@@ -39,7 +39,7 @@ Holberton School Project — Concepteur Développeur d'Applications
 
 ## Overview
 
-HBntory is a stock management system for a fictional wholesaler with multiple branches (Metro-style). The project combines two worlds that never talk to each other directly, and only ever share the same database:
+HBntory is a stock management system for a fictional retail company with multiple branches. The project combines two worlds that never talk to each other directly, and only ever share the same database:
 
 - **Backoffice** — internal authenticated application, used to manage stock (employee side) and user accounts (admin side)
 - **Client Web Interface** — public page, no authentication required, where anyone can ask a natural-language question about products and stock, answered by an AI agent connected to an MCP server
@@ -109,7 +109,7 @@ flowchart TD
     style DB fill:#EAF3DE,stroke:#27500A
 ```
 
-**Key point**: the Backoffice and the AI side never communicate directly — they only share the same database. The Backoffice writes stock into it, the MCP Server reads it to answer public questions.
+**Key point**: the Backoffice and the AI side never communicate directly, they only share the same database. The Backoffice writes stock into it, the MCP Server reads it to answer public questions.
 
 ---
 
@@ -143,7 +143,7 @@ erDiagram
     }
 ```
 
-**Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`) — never its name, price, or description. That information is always fetched on demand from the Product API.
+**Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`), never its name, price, or description. That information is always fetched on demand from the Product API.
 
 ---
 
@@ -156,7 +156,7 @@ erDiagram
 | Database | SQLite | No server configuration needed, sufficient for the project's scope |
 | Authentication | Flask-Login (sessions) | Classic internal use case, simpler to implement than JWT tokens in this context |
 | Password hashing | bcrypt | Automatic salting, tunable cost factor, recognized standard for password storage |
-| Public client communication | REST (not WebSocket) | Each question is handled independently, no conversation history to maintain |
+| Public client communication | REST | Each question is handled independently, no conversation history to maintain |
 | AI ↔ Product API bridge | MCP server (FastMCP) | Required by the spec, cleanly separates data access from the agent's logic |
 | Backoffice interface | Vanilla HTML / CSS / JavaScript | No framework needed for the project's scope |
 | Public client interface | Vanilla HTML / CSS / JavaScript | Simple chat page, no authentication |
@@ -185,9 +185,10 @@ project-root/
 ├── product_mcp_server/               # MCP server (Noham)
 ├── ai_service/                        # AI Query Service (Noham)
 ├── client_web/
-│   ├── index.html                     # Public interface (dashboard, chat, products, about)
-│   └── admin/
-│       └── index.html                  # Backoffice interface (login, stock, users)
+│   └── index.html                     # Public interface (dashboard, chat, products, about)
+├── admin/
+│   ├── HBntory Admin.dc.html           # Backoffice interface (login, stock, users)
+│   └── support.js                       # Runtime required to render the admin page
 ├── docs/                                # Documentation, diagrams
 ├── docker-compose.yml
 ├── Dockerfile.backoffice
@@ -209,7 +210,7 @@ The Backoffice is a classic internal use case consumed by a single type of clien
 
 ### 3. Authorization enforced exclusively on the backend
 
-Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface — a common user manually tampering with an HTTP request would still be blocked by the server.
+Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface, a common user manually tampering with an HTTP request would still be blocked by the server.
 
 ### 4. REST rather than WebSocket for the public client
 
@@ -217,7 +218,7 @@ Each question sent to the chat is independent (no conversation history required 
 
 ### 5. Soft-delete rather than physical deletion
 
-A deactivated user (`is_active = False`) can no longer log in, but their past stock movements remain intact in the database — matching the spec's requirement.
+A deactivated user (`is_active = False`) can no longer log in, but their past stock movements remain intact in the database, matching the spec's requirement.
 
 ---
 
@@ -233,7 +234,7 @@ python -m app.seed        # initializes the database (admin + branches + test st
 python run.py               # starts the server at http://127.0.0.1:5000
 ```
 
-The site (`client_web/index.html` and `client_web/admin/index.html`) is served separately via a static server (for example Live Server in VS Code).
+The public client (`client_web/index.html`) and the admin interface (`admin/HBntory Admin.dc.html`) are served separately via a static server (for example Live Server in VS Code).
 
 ---
 
@@ -242,9 +243,9 @@ The site (`client_web/index.html` and `client_web/admin/index.html`) is served s
 | Username | Password | Role | Branch |
 |---|---|---|---|
 | `admin` | `ChangeMe123!` | Admin | — |
-| `employee1` | `ChangeMe123!` | Common user | Metro Paris Nord |
-| `employee2` | `ChangeMe123!` | Common user | Metro Lyon Part-Dieu |
-| `employee3` | `ChangeMe123!` | Common user | Metro Marseille Sud |
+| `employee1` | `ChangeMe123!` | Common user | HBntory Paris |
+| `employee2` | `ChangeMe123!` | Common user | HBntory Lyon |
+| `employee3` | `ChangeMe123!` | Common user | HBntory Marseille |
 
 ---
 
@@ -283,7 +284,13 @@ The site (`client_web/index.html` and `client_web/admin/index.html`) is served s
 | File | Role in one sentence |
 |---|---|
 | `index.html` | Public interface: dashboard, AI assistant, product catalog, about page |
-| `admin/index.html` | Backoffice interface: login screen, stock management, account management |
+
+### `admin/`
+
+| File | Role in one sentence |
+|---|---|
+| `HBntory Admin.dc.html` | Backoffice interface: login screen, stock management, account management |
+| `support.js` | Runtime required to render the templating used by the admin page |
 
 ### Other
 
@@ -297,8 +304,22 @@ The site (`client_web/index.html` and `client_web/admin/index.html`) is served s
 
 ## Tests performed
 
-**13 functional tests** covering authentication, roles, stock operations, and account management — all passed.
+**13 functional tests** covering authentication, roles, stock operations, and account management, all passed.
 
 **7 security tests** covering SQL injection, role bypass via a stale session, mass assignment, type confusion, and unauthorized resource access — all passed, no exploitable flaw identified on the Backoffice side.
 
 One point of attention was identified for Task 6 (Client Web Interface): data displayed on the client side should be escaped using `textContent` rather than `innerHTML`, to avoid any risk of stored XSS originating from data entered through the Backoffice.
+
+**Manual integration tests (Sagal)**: 9 verifications run against the live backend and the external Product API, all passed.
+
+1. Login with correct credentials
+2. Login rejected with incorrect password
+3. `GET /branches` returns the correct branch names
+4. `DELETE /users/<id>` deactivates an account
+5. `PATCH /users/<id>/reactivate` reactivates it
+6. `PATCH /users/<id>` updates and persists a username change
+7. `health_check()` against the real Product API
+8. `get_product()` against the real Product API
+9. `list_products()` against the real Product API
+
+**AI Service / MCP Server tests (Noham)**: ~50 manual and automated checks run across the MCP tools and the AI agent's grounding behavior, still in progress, exact breakdown to be documented in `product_mcp_server/README.md` / `ai_service/README.md`.

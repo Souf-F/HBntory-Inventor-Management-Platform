@@ -1,0 +1,8 @@
+# Applies to builds using project-root/ as context (currently: mcp_server,
+# see docker-compose.yml, since its Dockerfile also needs to reach into
+# backoffice/app/).
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/.env
+**/*.db
