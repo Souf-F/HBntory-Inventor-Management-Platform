@@ -35,7 +35,7 @@
           </div>
         </div>
         <h1 style="font-family:'Baloo 2',sans-serif; font-size:20px; font-weight:700; margin:0 0 6px;">Connexion</h1>
-        <p style="color:#6B6A63; font-size:13px; margin:0 0 22px;">Accès réservé aux administrateurs.</p>
+        <p style="color:#6B6A63; font-size:13px; margin:0 0 22px;">Accès réservé aux administrateurs et employés.</p>
         <div style="display:flex; flex-direction:column; gap:14px;">
           <label style="display:flex; flex-direction:column; gap:6px;">
             <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Nom d'utilisateur</span>
@@ -71,13 +71,20 @@
         </div>
       </div>
       <nav style="display:flex; flex-direction:column; gap:10px;">
-        <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; font-size:14px; font-weight:700; background:{{ theme.navBg }}; color:{{ theme.navText }}; border:{{ theme.borderW }} solid {{ theme.border }}; cursor:default; box-shadow:{{ theme.shadowSm }};">
-          <span style="width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;">👤</span>Utilisateurs
-        </div>
+        <sc-if value="{{ isAdmin }}">
+          <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; font-size:14px; font-weight:700; background:{{ theme.navBg }}; color:{{ theme.navText }}; border:{{ theme.borderW }} solid {{ theme.border }}; cursor:default; box-shadow:{{ theme.shadowSm }};">
+            <span style="width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;">👤</span>Utilisateurs
+          </div>
+        </sc-if>
+        <sc-if value="{{ isCommonUser }}">
+          <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; font-size:14px; font-weight:700; background:{{ theme.navBg }}; color:{{ theme.navText }}; border:{{ theme.borderW }} solid {{ theme.border }}; cursor:default; box-shadow:{{ theme.shadowSm }};">
+            <span style="width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;">📦</span>Mon stock
+          </div>
+        </sc-if>
       </nav>
     </div>
     <div style="font-size:11px; color:{{ theme.muted }}; border-top:2px solid {{ theme.border }}; padding-top:12px; line-height:1.6; display:flex; align-items:center; justify-content:space-between;">
-      <div>Site admin<br>admin · session active
+      <div>Site admin<br>{{ currentUsername }} · session active
       <a onClick="{{ logout }}" style="display:block; margin-top:6px; color:#7B2FF7; cursor:pointer; font-weight:600;" style-hover="text-decoration:underline;">Se déconnecter</a>
       </div>
       <button onClick="{{ toggleDark }}" aria-label="Changer de thème" style="width:40px; height:40px; border-radius:50%; border:2px solid {{ theme.border }}; background:#7B2FF7; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;" style-hover="opacity:0.85;">{{ darkToggleIcon }}</button>
@@ -218,6 +225,56 @@
       </div>
     </sc-if>
 
+    <sc-if value="{{ isStock }}">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+        <div>
+          <h1 style="font-family:'Baloo 2',sans-serif; font-size:26px; font-weight:700; margin:0;">Mon stock</h1>
+          <p style="color:{{ theme.label }}; font-size:14px; margin-top:6px;">Gestion du stock pour votre branche.</p>
+        </div>
+        <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:700; background:{{ theme.roleEmployeeBg }}; color:{{ theme.roleEmployeeColor }}; border:1.5px solid currentColor; white-space:nowrap;">
+          <span style="width:6px; height:6px; border-radius:50%; background:currentColor;"></span>{{ currentBranchLabel }}
+        </span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px; background:{{ theme.card }}; border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:12px; padding:24px; margin-bottom:24px; box-shadow:{{ theme.shadowMd }}; color:{{ theme.text }};">
+        <div style="font-size:13px; font-weight:600; color:{{ theme.label }};">Ajouter ou retirer du stock</div>
+        <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+          <label style="display:flex; flex-direction:column; gap:6px; flex:2; min-width:180px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">ID Produit</span>
+            <input value="{{ stockForm.product_id }}" onChange="{{ onStockProductChange }}" placeholder="ex. HB-MON-2102" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px; flex:1; min-width:100px;">
+            <span style="font-size:13px; font-weight:600; color:{{ theme.label }};">Quantité</span>
+            <input value="{{ stockForm.quantity }}" onChange="{{ onStockQuantityChange }}" placeholder="ex. 10" style="font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px; border:1.5px solid {{ theme.border }}; border-radius:8px; outline:none; background:{{ theme.inputBg }}; color:{{ theme.text }};" style-focus="border-color:#7B2FF7; box-shadow:0 0 0 2px rgba(123,47,247,0.15);"></input>
+          </label>
+          <button onClick="{{ submitAddStock }}" style="background:#7B2FF7; color:#fff; border:{{ theme.borderW }} solid {{ theme.border }}; padding:10px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer; box-shadow:{{ theme.shadowSm }};" style-hover="background:#6A22DE;">+ Ajouter</button>
+          <button onClick="{{ submitRemoveStock }}" style="background:transparent; color:{{ theme.danger }}; border:{{ theme.borderW }} solid {{ theme.danger }}; padding:10px 17px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; cursor:pointer;" style-hover="background:{{ theme.dangerBg }};">− Retirer</button>
+        </div>
+        <sc-if value="{{ stockError }}">
+          <div style="font-size:13px; color:{{ theme.danger }}; background:{{ theme.dangerBg }}; border-radius:8px; padding:10px 12px;">{{ stockError }}</div>
+        </sc-if>
+      </div>
+
+      <div style="border:{{ theme.borderW }} solid {{ theme.border }}; border-radius:12px; overflow:hidden; box-shadow:{{ theme.shadowMd }};">
+      <table style="width:100%; border-collapse:collapse; background:{{ theme.card }};">
+        <thead>
+          <tr>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">ID Produit</th>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Quantité</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ stockItems }}" as="s" hint-placeholder-count="3">
+            <tr>
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; font-weight:600; color:{{ theme.text }};">{{ s.product_id }}</td>
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; color:{{ theme.text }};">{{ s.quantity }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      </div>
+    </sc-if>
+
     <sc-if value="{{ toast }}">
       <div style="position:fixed; bottom:28px; right:32px; background:{{ theme.text }}; color:{{ theme.bg }}; padding:12px 20px; border-radius:8px; font-size:14px; font-weight:500; border:1px solid {{ theme.border }}; box-shadow:{{ theme.shadowSm }};">{{ toast }}</div>
     </sc-if>
@@ -245,7 +302,7 @@
 ]]>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'http://127.0.0.1:5000';
 
 class Component extends DCLogic {
   getBranches() {
@@ -262,6 +319,9 @@ class Component extends DCLogic {
     loggedIn: false,
     loginForm: { username: '', password: '' },
     loginError: '',
+    // PATCH 2: role/branch state added for common_user stock view
+    currentRole: null,
+    currentBranchId: null,
     view: 'list',
     users: [],
     editingId: null,
@@ -272,6 +332,10 @@ class Component extends DCLogic {
     deleteTargetId: null,
     toast: null,
     networkError: null,
+    // PATCH 2 (cont.): stock view state
+    stockItems: [],
+    stockForm: { product_id: '', quantity: '' },
+    stockError: '',
   };
 
   showToast(msg) {
@@ -309,9 +373,23 @@ class Component extends DCLogic {
     }
   }
 
+  // PATCH 2 (cont.): load stock for the logged-in employee's branch
+  async loadStock() {
+    const branchId = this.state.currentBranchId;
+    if (!branchId) return;
+    const res = await this.api('/branches/' + branchId + '/stock', { method: 'GET' });
+    if (res.ok && res.data) {
+      this.setState({ stockItems: Array.isArray(res.data) ? res.data : (res.data.stock || []) });
+    } else if (res.status !== 0) {
+      this.showNetworkError("Impossible de charger le stock.");
+    }
+  }
+
   onLoginUsernameChange = (e) => this.setState(s => ({ loginForm: { ...s.loginForm, username: e.target.value } }));
   onLoginPasswordChange = (e) => this.setState(s => ({ loginForm: { ...s.loginForm, password: e.target.value } }));
 
+  // PATCH 1: submitLogin now captures role and branch_id from /login response
+  // and routes common_user accounts straight to the stock view.
   submitLogin = async () => {
     const { username, password } = this.state.loginForm;
     if (!username.trim() || !password.trim()) {
@@ -324,14 +402,29 @@ class Component extends DCLogic {
       return;
     }
     if (res.data && res.data.status === 'success') {
-      this.setState({ loggedIn: true, loginError: '', loginForm: { username: '', password: '' } });
-      this.loadUsers();
+      const role = res.data.role;
+      const branchId = res.data.branch_id;
+      const isCommon = role === 'common_user';
+      this.setState({
+        loggedIn: true,
+        loginError: '',
+        loginForm: { username: '', password: '' },
+        currentUsername: username,
+        currentRole: role,
+        currentBranchId: branchId,
+        view: isCommon ? 'stock' : 'list',
+      });
+      if (isCommon) {
+        this.loadStock();
+      } else {
+        this.loadUsers();
+      }
     } else {
       this.setState({ loginError: (res.data && (res.data.message || res.data.error)) || "Identifiants incorrects." });
     }
   };
 
-  logout = () => this.setState({ loggedIn: false, view: 'list' });
+  logout = () => this.setState({ loggedIn: false, view: 'list', currentRole: null, currentBranchId: null });
   toggleDark = () => this.setState(s => ({ dark: !s.dark }));
 
   goToList = () => this.setState({ view: 'list', createError: '', editError: '' });
@@ -350,6 +443,10 @@ class Component extends DCLogic {
   onEditUsernameChange = (e) => this.setState(s => ({ editForm: { ...s.editForm, username: e.target.value } }));
   onEditBranchChange = (e) => this.setState(s => ({ editForm: { ...s.editForm, branch_id: e.target.value } }));
   onEditPasswordChange = (e) => this.setState(s => ({ editForm: { ...s.editForm, newPassword: e.target.value } }));
+
+  // PATCH 2 (cont.): stock form handlers
+  onStockProductChange = (e) => this.setState(s => ({ stockForm: { ...s.stockForm, product_id: e.target.value } }));
+  onStockQuantityChange = (e) => this.setState(s => ({ stockForm: { ...s.stockForm, quantity: e.target.value } }));
 
   submitCreate = async () => {
     const username = this.state.createForm.username;
@@ -441,6 +538,69 @@ class Component extends DCLogic {
     }
   };
 
+  // PATCH 2 (cont.): add/remove stock for the current branch
+  // PATCH 6: wrapped in try/catch to surface unexpected errors in the console
+  // instead of letting them silently corrupt component state.
+  submitAddStock = async () => {
+    try {
+      const branchId = this.state.currentBranchId;
+      const productId = this.state.stockForm.product_id.trim();
+      const quantity = parseInt(this.state.stockForm.quantity, 10);
+      if (!productId || !Number.isInteger(quantity) || quantity <= 0) {
+        this.setState({ stockError: "ID produit et quantité (nombre positif) requis." });
+        return;
+      }
+      const res = await this.api('/branches/' + branchId + '/stock', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId, quantity }),
+      });
+      if (res.status === 0) {
+        this.setState({ stockError: "Le serveur ne répond pas." });
+        return;
+      }
+      if (res.ok) {
+        this.setState({ stockForm: { product_id: '', quantity: '' }, stockError: '' });
+        this.loadStock();
+        this.showToast('Stock mis à jour.');
+      } else {
+        this.setState({ stockError: (res.data && (res.data.message || res.data.error)) || "Erreur lors de l'ajout." });
+      }
+    } catch (e) {
+      console.error('[submitAddStock] unexpected error:', e);
+      this.setState({ stockError: "Erreur inattendue lors de l'ajout : " + (e && e.message ? e.message : String(e)) });
+    }
+  };
+
+  submitRemoveStock = async () => {
+    try {
+      const branchId = this.state.currentBranchId;
+      const productId = this.state.stockForm.product_id.trim();
+      const quantity = parseInt(this.state.stockForm.quantity, 10);
+      if (!productId || !Number.isInteger(quantity) || quantity <= 0) {
+        this.setState({ stockError: "ID produit et quantité (nombre positif) requis." });
+        return;
+      }
+      const res = await this.api('/branches/' + branchId + '/stock/remove', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId, quantity }),
+      });
+      if (res.status === 0) {
+        this.setState({ stockError: "Le serveur ne répond pas." });
+        return;
+      }
+      if (res.ok) {
+        this.setState({ stockForm: { product_id: '', quantity: '' }, stockError: '' });
+        this.loadStock();
+        this.showToast('Stock mis à jour.');
+      } else {
+        this.setState({ stockError: (res.data && (res.data.message || res.data.error)) || "Erreur lors du retrait." });
+      }
+    } catch (e) {
+      console.error('[submitRemoveStock] unexpected error:', e);
+      this.setState({ stockError: "Erreur inattendue lors du retrait : " + (e && e.message ? e.message : String(e)) });
+    }
+  };
+
   renderVals() {
     const view = this.state.view;
     const users = this.state.users;
@@ -488,8 +648,21 @@ class Component extends DCLogic {
       onReactivate: () => this.reactivate(u.id),
     }));
 
+    // PATCH 3: nav is conditional on role — isAdmin / isCommonUser drive which
+    // nav item and view render, instead of the old single hardcoded "Utilisateurs" item.
+    const currentRole = this.state.currentRole;
+    const isAdmin = currentRole === 'admin';
+    const isCommonUser = currentRole === 'common_user';
+
+    // PATCH 4 (part): resolve the branch name for the badge instead of showing the raw ID.
+    const currentBranchId = this.state.currentBranchId;
+    const currentBranchLabel = currentBranchId
+      ? (branchMap[currentBranchId] || ('Branche #' + currentBranchId))
+      : '—';
+
     return {
       theme: theme,
+      currentUsername: this.state.currentUsername || 'admin',
       darkToggleIcon: dark ? '☀' : '☾',
       toggleDark: this.toggleDark,
       isLoggedIn: this.state.loggedIn,
@@ -500,9 +673,14 @@ class Component extends DCLogic {
       onLoginPasswordChange: this.onLoginPasswordChange,
       submitLogin: this.submitLogin,
       logout: this.logout,
+      // PATCH 5: expose all new role/stock variables to the template
+      isAdmin: isAdmin,
+      isCommonUser: isCommonUser,
+      currentBranchLabel: currentBranchLabel,
       isList: view === 'list',
       isCreate: view === 'create',
       isEdit: view === 'edit',
+      isStock: view === 'stock',
       users: rows,
       branches: this.getBranches(),
       createForm: this.state.createForm,
@@ -527,6 +705,14 @@ class Component extends DCLogic {
       requestDeleteFromEdit: this.requestDeleteFromEdit,
       cancelDelete: this.cancelDelete,
       confirmDelete: this.confirmDelete,
+      // PATCH 5 (cont.): stock view bindings
+      stockItems: this.state.stockItems,
+      stockForm: this.state.stockForm,
+      stockError: this.state.stockError,
+      onStockProductChange: this.onStockProductChange,
+      onStockQuantityChange: this.onStockQuantityChange,
+      submitAddStock: this.submitAddStock,
+      submitRemoveStock: this.submitRemoveStock,
     };
   }
 }
