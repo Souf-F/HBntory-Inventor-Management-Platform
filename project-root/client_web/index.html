@@ -512,6 +512,49 @@ class Component extends DCLogic {
     const isMobile = s.isMobile;
     const isDesktop = !isMobile;
 
+    // The Product API returns names in English only. We translate for
+    // display purposes here, keyed by sku, without altering the data itself.
+    const NAME_FR = {
+      "HB-LAP-1001": "Ordinateur portable étudiant 14 pouces",
+      "HB-LAP-1002": "Ordinateur portable étudiant 16 pouces",
+      "HB-MON-2101": "Moniteur de laboratoire 27 pouces",
+      "HB-MON-2102": "Moniteur compact 24 pouces",
+      "HB-DCK-3001": "Station d'accueil USB-C pour salle de classe",
+      "HB-KBD-4101": "Clavier mécanique anglais",
+      "HB-KBD-4102": "Clavier compact espagnol",
+      "HB-MSE-4201": "Souris sans fil",
+      "HB-CAM-5101": "Webcam HD",
+      "HB-MIC-5201": "Microphone USB de classe",
+      "HB-HDS-5301": "Casque antibruit",
+      "HB-RTR-6101": "Routeur de laboratoire AC1200",
+      "HB-SWT-6201": "Commutateur administrable 8 ports",
+      "HB-CBL-6301": "Câble Ethernet 2m",
+      "HB-SSD-7101": "SSD externe 1 To",
+      "HB-SSD-7102": "SSD externe 2 To",
+      "HB-USB-7201": "Clé USB 64 Go",
+      "HB-USB-7202": "Clé USB 128 Go",
+      "HB-PWR-8101": "Chargeur ordinateur portable 65W",
+      "HB-PWR-8102": "Chargeur USB-C 100W",
+      "HB-PWR-8201": "Parasurtenseur 6 prises",
+      "HB-CHR-9101": "Chaise de laboratoire ergonomique",
+      "HB-DSK-9201": "Bureau étudiant compact",
+      "HB-WHT-9301": "Tableau blanc mobile",
+      "HB-BAG-1011": "Housse ordinateur portable 14 pouces",
+      "HB-BAG-1012": "Sac à dos pour ordinateur portable",
+      "HB-DEV-1111": "Kit ordinateur monocarte",
+      "HB-DEV-1112": "Kit de démarrage capteurs",
+      "HB-DEV-1113": "Lot de plaques d'essai",
+      "HB-ACC-1211": "Câble HDMI 1,5m",
+      "HB-ACC-1212": "Câble USB-C 1m",
+      "HB-SEC-1401": "Lot de cartes d'accès RFID",
+      "HB-SEC-1402": "Clé de sécurité USB",
+      "HB-PRN-1501": "Imprimante d'étiquettes",
+      "HB-LBL-1502": "Rouleau d'étiquettes d'inventaire",
+      "HB-SCN-1601": "Scanner de codes-barres USB",
+      "HB-TAB-1701": "Tablette d'inventaire 10 pouces",
+      "HB-TAB-1702": "Coque de protection pour tablette",
+      "HB-LGT-1801": "Lampe de bureau LED"
+    };
     const palette = ["#F0208B", "#17C3D6", "#F5B700", "#FF5A1F", "#7B2FF7"];
     // The Product API never returns product images (see the sample response —
     // only identifiers, names, categories, prices, tags). Rather than call an
@@ -534,7 +577,7 @@ class Component extends DCLogic {
       // golden rule) — stock only exists per branch, in our own database.
       // Show product info here; use the Assistant to ask about availability.
       return {
-        id: p.sku || p.id, name: p.name || "Produit", branch: p.category || "—",
+        id: p.sku || p.id, name: NAME_FR[p.sku] || p.name || "Produit", branch: p.category || "—",
         initial: CATEGORY_ICONS[p.category] || "\uD83D\uDCE6",
         // Looks for a manually-added image at assets/products/<sku>.png.
         // If it 404s, the inline onerror above hides it and the category
@@ -613,6 +656,7 @@ class Component extends DCLogic {
     };
   }
 }
+
 </script>
 </body>
 </html>
