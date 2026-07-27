@@ -5,6 +5,22 @@ Client Web Interface and answers it using the Product MCP Server tools.
 Never invents data: if the information isn't available through the tools,
 it says so clearly.
 
+## Endpoint
+
+REST, not WebSockets (see architecture.md, Decision 1): each question
+is handled independently, no conversation history, so there's no need
+for a persistent connection.
+
+`POST /ask`
+```json
+{"question": "Quel est le prix du 24 inch Compact Monitor ?"}
+```
+```json
+{"answer": "Le prix du 24 inch Compact Monitor est 169.99."}
+```
+
+`GET /health` for a basic liveness check.
+
 ## Supported question types
 
 | # | Type | Example (French) | Example (English) |
