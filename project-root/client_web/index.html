@@ -125,7 +125,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:44px;">
           <div style="flex:1 1 220px;background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:26px;position:relative;">
             <div style="position:absolute;top:0;left:0;width:100%;height:8px;background:#17C3D6;"></div>
-            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;">3 214</div>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;">{{ productCount }}</div>
             <div style="font-size:14px;font-weight:600;color:var(--muted);margin-top:6px;">Références produits</div>
           </div>
           <div style="flex:1 1 220px;background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:26px;position:relative;">
@@ -156,7 +156,6 @@
         <sc-if value="{{ showDemo }}" hint-placeholder-val="{{ true }}">
           <div style="background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:30px;">
             <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;margin-bottom:4px;">Tester l'ajout d'un produit</div>
-            <div style="font-size:13px;font-style:italic;color:var(--muted);margin-bottom:20px;">Démo locale — aucun appel serveur, uniquement dans votre navigateur.</div>
             <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
               <input type="text" placeholder="ID produit (ex : 4821)" value="{{ demoId }}" onChange="{{ onDemoIdChange }}" onKeyDown="{{ onDemoKeyDown }}" style="flex:1 1 240px;padding:14px 16px;border:3px solid var(--border);font-family:'Space Grotesk',sans-serif;font-size:15px;background:var(--bg);" />
               <div style="{{ buttons.add.base }}" style-hover="{{ buttons.add.hover }}" style-active="{{ buttons.add.active }}" onClick="{{ onDemoAdd }}">Ajouter</div>
@@ -265,7 +264,10 @@
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;">
             <sc-for list="{{ catalogCards }}" as="p" hint-placeholder-count="6">
               <div style="background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);overflow:hidden;">
-                <div style="{{ p.thumbStyle }}">{{ p.initial }}</div>
+                <div style="{{ p.thumbStyle }}">
+                  {{ p.initial }}
+                  <img src="{{ p.imageSrc }}" alt="" onerror="this.style.display='none'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;" />
+                </div>
                 <div style="padding:16px;">
                   <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-bottom:4px;">{{ p.name }}</div>
                   <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Réf. {{ p.id }} · {{ p.branch }}</div>
@@ -331,27 +333,27 @@
         <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;margin:0 0 22px;">L'équipe</div>
         <div style="display:flex;flex-wrap:wrap;gap:32px;">
           <div style="flex:1 1 300px;max-width:380px;background:var(--surface);border:3px solid var(--border);box-shadow:8px 8px 0 var(--shadowColor);padding:34px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;">
-            <image-slot id="team-sagal" style="width:170px;height:170px;" shape="circle" placeholder="Photo"></image-slot>
+            <img src="assets/sagal_louise_haider.png" alt="Sagal-Louise Haider" style="width:170px;height:170px;border-radius:50%;object-fit:cover;border:3px solid var(--border);" />
             <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;">Sagal-Louise Haider</div>
             <div style="display:flex;gap:14px;">
-              <a href="#" target="_blank" rel="noopener" style="width:46px;height:46px;background:#17C3D6;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7 0h3.83v2.05h.05c.53-1 1.84-2.05 3.79-2.05C19.6 8 21 10.2 21 13.9V23h-4v-8.1c0-1.93-.03-4.4-2.68-4.4-2.68 0-3.09 2.1-3.09 4.27V23h-4V8Z"></path></svg></a>
-              <a href="#" target="_blank" rel="noopener" style="width:46px;height:46px;background:#16130F;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.44-2.71 5.42-5.29 5.7.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg></a>
+              <a href="https://www.linkedin.com/in/sagalou/" target="_blank" rel="noopener" style="width:46px;height:46px;background:#17C3D6;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7 0h3.83v2.05h.05c.53-1 1.84-2.05 3.79-2.05C19.6 8 21 10.2 21 13.9V23h-4v-8.1c0-1.93-.03-4.4-2.68-4.4-2.68 0-3.09 2.1-3.09 4.27V23h-4V8Z"></path></svg></a>
+              <a href="https://github.com/sagalou" target="_blank" rel="noopener" style="width:46px;height:46px;background:#16130F;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.44-2.71 5.42-5.29 5.7.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg></a>
             </div>
           </div>
           <div style="flex:1 1 300px;max-width:380px;background:var(--surface);border:3px solid var(--border);box-shadow:8px 8px 0 var(--shadowColor);padding:34px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;">
-            <image-slot id="team-noham" style="width:170px;height:170px;" shape="circle" placeholder="Photo"></image-slot>
+            <img src="assets/Noham_oulma.png" alt="Noham Oulma" style="width:170px;height:170px;border-radius:50%;object-fit:cover;border:3px solid var(--border);" />
             <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;">Noham Oulma</div>
             <div style="display:flex;gap:14px;">
-              <a href="#" target="_blank" rel="noopener" style="width:46px;height:46px;background:#17C3D6;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7 0h3.83v2.05h.05c.53-1 1.84-2.05 3.79-2.05C19.6 8 21 10.2 21 13.9V23h-4v-8.1c0-1.93-.03-4.4-2.68-4.4-2.68 0-3.09 2.1-3.09 4.27V23h-4V8Z"></path></svg></a>
-              <a href="#" target="_blank" rel="noopener" style="width:46px;height:46px;background:#16130F;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.44-2.71 5.42-5.29 5.7.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg></a>
+              <a href="https://www.linkedin.com/in/nohamoulma/" target="_blank" rel="noopener" style="width:46px;height:46px;background:#17C3D6;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7 0h3.83v2.05h.05c.53-1 1.84-2.05 3.79-2.05C19.6 8 21 10.2 21 13.9V23h-4v-8.1c0-1.93-.03-4.4-2.68-4.4-2.68 0-3.09 2.1-3.09 4.27V23h-4V8Z"></path></svg></a>
+              <a href="https://github.com/nohamoulma-hub" target="_blank" rel="noopener" style="width:46px;height:46px;background:#16130F;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.44-2.71 5.42-5.29 5.7.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg></a>
             </div>
           </div>
           <div style="flex:1 1 300px;max-width:380px;background:var(--surface);border:3px solid var(--border);box-shadow:8px 8px 0 var(--shadowColor);padding:34px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;">
-            <image-slot id="team-soufiane" style="width:170px;height:170px;" shape="circle" placeholder="Photo"></image-slot>
+            <img src="assets/soufiane_filali.png" alt="Soufiane Filali" style="width:170px;height:170px;border-radius:50%;object-fit:cover;border:3px solid var(--border);" />
             <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;">Soufiane Filali</div>
             <div style="display:flex;gap:14px;">
-              <a href="#" target="_blank" rel="noopener" style="width:46px;height:46px;background:#17C3D6;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7 0h3.83v2.05h.05c.53-1 1.84-2.05 3.79-2.05C19.6 8 21 10.2 21 13.9V23h-4v-8.1c0-1.93-.03-4.4-2.68-4.4-2.68 0-3.09 2.1-3.09 4.27V23h-4V8Z"></path></svg></a>
-              <a href="#" target="_blank" rel="noopener" style="width:46px;height:46px;background:#16130F;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.44-2.71 5.42-5.29 5.7.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg></a>
+              <a href="https://www.linkedin.com/in/soufiane-filali-dev/" target="_blank" rel="noopener" style="width:46px;height:46px;background:#17C3D6;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7 0h3.83v2.05h.05c.53-1 1.84-2.05 3.79-2.05C19.6 8 21 10.2 21 13.9V23h-4v-8.1c0-1.93-.03-4.4-2.68-4.4-2.68 0-3.09 2.1-3.09 4.27V23h-4V8Z"></path></svg></a>
+              <a href="https://github.com/Souf-F" target="_blank" rel="noopener" style="width:46px;height:46px;background:#16130F;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.71 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.44-2.71 5.42-5.29 5.7.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg></a>
             </div>
           </div>
         </div>
@@ -363,13 +365,13 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900},
-  &quot;chatApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://api.hbntory.exemple.fr/v1/assistant/ask&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
-  &quot;productsApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://api.hbntory.exemple.fr/v1/catalogue/produits&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
+  &quot;chatApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:8100/ask&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
+  &quot;productsApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:5001/api/v1/products?limit=100&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
   &quot;showDemoSection&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Configuration&quot;}
 }">
 class Component extends DCLogic {
-  static CHAT_API_URL = "https://api.hbntory.exemple.fr/v1/assistant/ask";
-  static PRODUCTS_API_URL = "https://api.hbntory.exemple.fr/v1/catalogue/produits";
+  static CHAT_API_URL = "http://127.0.0.1:8100/ask";
+  static PRODUCTS_API_URL = "http://127.0.0.1:5001/api/v1/products?limit=100";
 
   state = {
     page: "dashboard",
@@ -496,7 +498,7 @@ class Component extends DCLogic {
       clearTimeout(timeoutId);
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
-      const list = Array.isArray(data) ? data : (data.products || data.items || []);
+      const list = Array.isArray(data) ? data : (data.results || data.products || data.items || []);
       this.setState({ catalogState: "loaded", catalogProducts: list });
     } catch (err) {
       this.setState({ catalogState: "error", catalogError: "Le service catalogue est momentanément indisponible. Vérifiez la connexion ou réessayez." });
@@ -509,15 +511,80 @@ class Component extends DCLogic {
     const isMobile = s.isMobile;
     const isDesktop = !isMobile;
 
+    // The Product API returns names in English only. We translate for
+    // display purposes here, keyed by sku, without altering the data itself.
+    const NAME_FR = {
+      "HB-LAP-1001": "Ordinateur portable étudiant 14 pouces",
+      "HB-LAP-1002": "Ordinateur portable étudiant 16 pouces",
+      "HB-MON-2101": "Moniteur de laboratoire 27 pouces",
+      "HB-MON-2102": "Moniteur compact 24 pouces",
+      "HB-DCK-3001": "Station d'accueil USB-C pour salle de classe",
+      "HB-KBD-4101": "Clavier mécanique anglais",
+      "HB-KBD-4102": "Clavier compact espagnol",
+      "HB-MSE-4201": "Souris sans fil",
+      "HB-CAM-5101": "Webcam HD",
+      "HB-MIC-5201": "Microphone USB de classe",
+      "HB-HDS-5301": "Casque antibruit",
+      "HB-RTR-6101": "Routeur de laboratoire AC1200",
+      "HB-SWT-6201": "Commutateur administrable 8 ports",
+      "HB-CBL-6301": "Câble Ethernet 2m",
+      "HB-SSD-7101": "SSD externe 1 To",
+      "HB-SSD-7102": "SSD externe 2 To",
+      "HB-USB-7201": "Clé USB 64 Go",
+      "HB-USB-7202": "Clé USB 128 Go",
+      "HB-PWR-8101": "Chargeur ordinateur portable 65W",
+      "HB-PWR-8102": "Chargeur USB-C 100W",
+      "HB-PWR-8201": "Parasurtenseur 6 prises",
+      "HB-CHR-9101": "Chaise de laboratoire ergonomique",
+      "HB-DSK-9201": "Bureau étudiant compact",
+      "HB-WHT-9301": "Tableau blanc mobile",
+      "HB-BAG-1011": "Housse ordinateur portable 14 pouces",
+      "HB-BAG-1012": "Sac à dos pour ordinateur portable",
+      "HB-DEV-1111": "Kit ordinateur monocarte",
+      "HB-DEV-1112": "Kit de démarrage capteurs",
+      "HB-DEV-1113": "Lot de plaques d'essai",
+      "HB-ACC-1211": "Câble HDMI 1,5m",
+      "HB-ACC-1212": "Câble USB-C 1m",
+      "HB-SEC-1401": "Lot de cartes d'accès RFID",
+      "HB-SEC-1402": "Clé de sécurité USB",
+      "HB-PRN-1501": "Imprimante d'étiquettes",
+      "HB-LBL-1502": "Rouleau d'étiquettes d'inventaire",
+      "HB-SCN-1601": "Scanner de codes-barres USB",
+      "HB-TAB-1701": "Tablette d'inventaire 10 pouces",
+      "HB-TAB-1702": "Coque de protection pour tablette",
+      "HB-LGT-1801": "Lampe de bureau LED"
+    };
     const palette = ["#F0208B", "#17C3D6", "#F5B700", "#FF5A1F", "#7B2FF7"];
+    // The Product API never returns product images (see the sample response —
+    // only identifiers, names, categories, prices, tags). Rather than call an
+    // external image service that could fail during the demo, each category
+    // gets a fixed representative icon instead.
+    const CATEGORY_ICONS = {
+      "Displays": "\uD83D\uDDA5\uFE0F",
+      "Networking": "\uD83D\uDD0C",
+      "Operations": "\uD83D\uDCE6",
+      "Development Kits": "\uD83D\uDD27",
+      "Accessories": "\u2328\uFE0F",
+      "Furniture": "\uD83E\uDE91",
+      "Storage": "\uD83D\uDCBE",
+      "Video": "\uD83D\uDCF9",
+      "Laptops": "\uD83D\uDCBB",
+      "Mobile Devices": "\uD83D\uDCF1"
+    };
     const catalogCards = (s.catalogProducts || []).map((p, i) => {
-      const stock = p.stock || 0;
+      // The Product API never returns stock (by design, see architecture.md
+      // golden rule) — stock only exists per branch, in our own database.
+      // Show product info here; use the Assistant to ask about availability.
       return {
-        id: p.id, name: p.name || "Produit", branch: p.branch || "—",
-        initial: (p.name || "?").charAt(0).toUpperCase(),
-        thumbStyle: { height: "96px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: "34px", color: "#fff", background: palette[i % palette.length] },
-        stockLabel: stock > 10 ? ("En stock (" + stock + ")") : (stock > 0 ? ("Stock faible (" + stock + ")") : "Rupture de stock"),
-        badgeStyle: { display: "inline-block", padding: "4px 10px", fontSize: "12px", fontWeight: 700, border: "2px solid #16130F", background: stock > 10 ? "#C9F2D6" : (stock > 0 ? "#FFE8A3" : "#FFD0D8") }
+        id: p.sku || p.id, name: NAME_FR[p.sku] || p.name || "Produit", branch: p.category || "—",
+        initial: CATEGORY_ICONS[p.category] || "\uD83D\uDCE6",
+        // Looks for a manually-added image at assets/products/<sku>.png.
+        // If it 404s, the inline onerror above hides it and the category
+        // icon underneath stays visible — no broken-image icon shown.
+        imageSrc: "assets/products/" + (p.sku || p.id) + ".png",
+        thumbStyle: { position: "relative", height: "150px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "40px", background: palette[i % palette.length], overflow: "hidden" },
+        stockLabel: p.unit_price != null ? (p.unit_price + " " + (p.currency || "")) : "Prix non communiqué",
+        badgeStyle: { display: "inline-block", padding: "4px 10px", fontSize: "12px", fontWeight: 700, border: "2px solid #16130F", background: "#E9EAF0", color: "#16130F" }
       };
     });
 
@@ -539,10 +606,10 @@ class Component extends DCLogic {
     });
 
     const chips = [
-      { label: "Où puis-je trouver le produit X ?", onClick: () => this.handleSend("Où puis-je trouver le produit X ?") },
-      { label: "Quels produits sont disponibles dans la branche Y ?", onClick: () => this.handleSend("Quels produits sont disponibles dans la branche Y ?") },
-      { label: "Il me faut 3 unités de X, 2 de Y et 4 de Z, dans quelle(s) branche(s) puis-je tout trouver ?", onClick: () => this.handleSend("Il me faut 3 unités de X, 2 de Y et 4 de Z, dans quelle(s) branche(s) puis-je tout trouver ?") },
-      { label: "Donne-moi les détails du produit XX", onClick: () => this.handleSend("Donne-moi les détails du produit XX") }
+      { label: "Où puis-je trouver le 24 inch Compact Monitor ?", onClick: () => this.handleSend("Où puis-je trouver le 24 inch Compact Monitor ?") },
+      { label: "Quels produits sont disponibles à Metro Paris Nord ?", onClick: () => this.handleSend("Quels produits sont disponibles à la branche Metro Paris Nord ?") },
+      { label: "Il me faut 3 unités de 8-Port Managed Switch et 2 de Barcode Scanner USB, dans quelle(s) branche(s) puis-je tout trouver ?", onClick: () => this.handleSend("Il me faut 3 unités de 8-Port Managed Switch et 2 de Barcode Scanner USB, dans quelle(s) branche(s) puis-je tout trouver ?") },
+      { label: "Donne-moi les détails du produit HB-MON-2102", onClick: () => this.handleSend("Donne-moi les détails du produit HB-MON-2102") }
     ];
 
     const isDark = s.isDark;
@@ -561,6 +628,7 @@ class Component extends DCLogic {
 
     return {
       isMobile, isDesktop, isDark, toggleDark: this.toggleDark, appRootStyle,
+      productCount: (s.catalogProducts || []).length || "—",
       darkLabel: isDark ? "Mode clair" : "Mode sombre",
       darkToggleGlyph: isDark ? "☀" : "☾",
       buttons2: { toggle: toggleBtn },

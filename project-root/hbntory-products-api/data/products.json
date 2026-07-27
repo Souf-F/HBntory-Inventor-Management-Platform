@@ -1,0 +1,846 @@
+{
+  "suppliers": [
+    {
+      "id": "SUP-HBT-001",
+      "name": "Holberton Tools Co.",
+      "contact_email": "catalog@holberton-tools.example",
+      "country": "US",
+      "lead_time_days": 5,
+      "reliability_score": 0.97
+    },
+    {
+      "id": "SUP-LAB-002",
+      "name": "LabForge Supplies",
+      "contact_email": "orders@labforge.example",
+      "country": "UY",
+      "lead_time_days": 7,
+      "reliability_score": 0.94
+    },
+    {
+      "id": "SUP-CMP-003",
+      "name": "Campus Components",
+      "contact_email": "sales@campus-components.example",
+      "country": "BR",
+      "lead_time_days": 10,
+      "reliability_score": 0.91
+    },
+    {
+      "id": "SUP-WEB-004",
+      "name": "WebCraft Devices",
+      "contact_email": "inventory@webcraft.example",
+      "country": "MX",
+      "lead_time_days": 4,
+      "reliability_score": 0.96
+    },
+    {
+      "id": "SUP-OPS-005",
+      "name": "OpsReady Warehouse",
+      "contact_email": "support@opsready.example",
+      "country": "CL",
+      "lead_time_days": 12,
+      "reliability_score": 0.88
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "sku": "HB-LAP-1001",
+      "name": "Holberton Student Laptop 14",
+      "description": "Training catalog item for HBntory integration: holberton student laptop 14.",
+      "category": "Laptops",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 799.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 1.35,
+      "tags": [
+        "student",
+        "portable",
+        "linux-ready"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 2,
+      "sku": "HB-LAP-1002",
+      "name": "Holberton Student Laptop 16",
+      "description": "Training catalog item for HBntory integration: holberton student laptop 16.",
+      "category": "Laptops",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 999.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 1.82,
+      "tags": [
+        "student",
+        "performance",
+        "linux-ready"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 3,
+      "sku": "HB-MON-2101",
+      "name": "27 inch Lab Monitor",
+      "description": "Training catalog item for HBntory integration: 27 inch lab monitor.",
+      "category": "Displays",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 229.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 5.1,
+      "tags": [
+        "display",
+        "lab",
+        "hdmi"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 4,
+      "sku": "HB-MON-2102",
+      "name": "24 inch Compact Monitor",
+      "description": "Training catalog item for HBntory integration: 24 inch compact monitor.",
+      "category": "Displays",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 169.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 3.9,
+      "tags": [
+        "display",
+        "compact",
+        "vga"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 5,
+      "sku": "HB-DCK-3001",
+      "name": "USB-C Teaching Dock",
+      "description": "Training catalog item for HBntory integration: usb-c teaching dock.",
+      "category": "Accessories",
+      "brand": "WebCraft",
+      "supplier_id": "SUP-WEB-004",
+      "supplier_name": "WebCraft Devices",
+      "unit_price": 89.9,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.42,
+      "tags": [
+        "usb-c",
+        "dock",
+        "classroom"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 6,
+      "sku": "HB-KBD-4101",
+      "name": "Mechanical Keyboard EN",
+      "description": "Training catalog item for HBntory integration: mechanical keyboard en.",
+      "category": "Accessories",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 74.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.91,
+      "tags": [
+        "keyboard",
+        "mechanical",
+        "english"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 7,
+      "sku": "HB-KBD-4102",
+      "name": "Compact Keyboard ES",
+      "description": "Training catalog item for HBntory integration: compact keyboard es.",
+      "category": "Accessories",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 49.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.65,
+      "tags": [
+        "keyboard",
+        "spanish",
+        "compact"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 8,
+      "sku": "HB-MSE-4201",
+      "name": "Wireless Mouse",
+      "description": "Training catalog item for HBntory integration: wireless mouse.",
+      "category": "Accessories",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 24.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.11,
+      "tags": [
+        "mouse",
+        "wireless",
+        "office"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 9,
+      "sku": "HB-CAM-5101",
+      "name": "HD Webcam",
+      "description": "Training catalog item for HBntory integration: hd webcam.",
+      "category": "Video",
+      "brand": "WebCraft",
+      "supplier_id": "SUP-WEB-004",
+      "supplier_name": "WebCraft Devices",
+      "unit_price": 59.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.18,
+      "tags": [
+        "webcam",
+        "remote",
+        "video"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 10,
+      "sku": "HB-MIC-5201",
+      "name": "USB Classroom Microphone",
+      "description": "Training catalog item for HBntory integration: usb classroom microphone.",
+      "category": "Audio",
+      "brand": "WebCraft",
+      "supplier_id": "SUP-WEB-004",
+      "supplier_name": "WebCraft Devices",
+      "unit_price": 64.9,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.31,
+      "tags": [
+        "microphone",
+        "usb",
+        "classroom"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 11,
+      "sku": "HB-HDS-5301",
+      "name": "Noise-Isolating Headset",
+      "description": "Training catalog item for HBntory integration: noise-isolating headset.",
+      "category": "Audio",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 39.9,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.29,
+      "tags": [
+        "headset",
+        "audio",
+        "support"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 12,
+      "sku": "HB-RTR-6101",
+      "name": "Lab Router AC1200",
+      "description": "Training catalog item for HBntory integration: lab router ac1200.",
+      "category": "Networking",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 119.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.72,
+      "tags": [
+        "network",
+        "router",
+        "wifi"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 13,
+      "sku": "HB-SWT-6201",
+      "name": "8-Port Managed Switch",
+      "description": "Training catalog item for HBntory integration: 8-port managed switch.",
+      "category": "Networking",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 89.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.58,
+      "tags": [
+        "network",
+        "switch",
+        "managed"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 14,
+      "sku": "HB-CBL-6301",
+      "name": "Ethernet Cable 2m",
+      "description": "Training catalog item for HBntory integration: ethernet cable 2m.",
+      "category": "Networking",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 5.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.05,
+      "tags": [
+        "cable",
+        "ethernet",
+        "cat6"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 15,
+      "sku": "HB-SSD-7101",
+      "name": "External SSD 1TB",
+      "description": "Training catalog item for HBntory integration: external ssd 1tb.",
+      "category": "Storage",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 99.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.09,
+      "tags": [
+        "storage",
+        "ssd",
+        "backup"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 16,
+      "sku": "HB-SSD-7102",
+      "name": "External SSD 2TB",
+      "description": "Training catalog item for HBntory integration: external ssd 2tb.",
+      "category": "Storage",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 159.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.12,
+      "tags": [
+        "storage",
+        "ssd",
+        "backup"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 17,
+      "sku": "HB-USB-7201",
+      "name": "USB Drive 64GB",
+      "description": "Training catalog item for HBntory integration: usb drive 64gb.",
+      "category": "Storage",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 8.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.02,
+      "tags": [
+        "storage",
+        "usb",
+        "portable"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 18,
+      "sku": "HB-USB-7202",
+      "name": "USB Drive 128GB",
+      "description": "Training catalog item for HBntory integration: usb drive 128gb.",
+      "category": "Storage",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 14.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.02,
+      "tags": [
+        "storage",
+        "usb",
+        "portable"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 19,
+      "sku": "HB-PWR-8101",
+      "name": "Laptop Charger 65W",
+      "description": "Training catalog item for HBntory integration: laptop charger 65w.",
+      "category": "Power",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 34.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.24,
+      "tags": [
+        "charger",
+        "power",
+        "laptop"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 20,
+      "sku": "HB-PWR-8102",
+      "name": "USB-C Charger 100W",
+      "description": "Training catalog item for HBntory integration: usb-c charger 100w.",
+      "category": "Power",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 59.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.31,
+      "tags": [
+        "charger",
+        "usb-c",
+        "fast-charge"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 21,
+      "sku": "HB-PWR-8201",
+      "name": "Surge Protector 6-Outlet",
+      "description": "Training catalog item for HBntory integration: surge protector 6-outlet.",
+      "category": "Power",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 27.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.72,
+      "tags": [
+        "power",
+        "surge",
+        "classroom"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 22,
+      "sku": "HB-CHR-9101",
+      "name": "Ergonomic Lab Chair",
+      "description": "Training catalog item for HBntory integration: ergonomic lab chair.",
+      "category": "Furniture",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 129.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 10.5,
+      "tags": [
+        "chair",
+        "ergonomic",
+        "lab"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 23,
+      "sku": "HB-DSK-9201",
+      "name": "Compact Student Desk",
+      "description": "Training catalog item for HBntory integration: compact student desk.",
+      "category": "Furniture",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 149.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 18.4,
+      "tags": [
+        "desk",
+        "student",
+        "furniture"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 24,
+      "sku": "HB-WHT-9301",
+      "name": "Mobile Whiteboard",
+      "description": "Training catalog item for HBntory integration: mobile whiteboard.",
+      "category": "Furniture",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 189.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 14.2,
+      "tags": [
+        "whiteboard",
+        "mobile",
+        "teaching"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 25,
+      "sku": "HB-BAG-1011",
+      "name": "Laptop Sleeve 14",
+      "description": "Training catalog item for HBntory integration: laptop sleeve 14.",
+      "category": "Accessories",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 19.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.19,
+      "tags": [
+        "sleeve",
+        "laptop",
+        "student"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 26,
+      "sku": "HB-BAG-1012",
+      "name": "Laptop Backpack",
+      "description": "Training catalog item for HBntory integration: laptop backpack.",
+      "category": "Accessories",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 49.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.74,
+      "tags": [
+        "backpack",
+        "laptop",
+        "student"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 27,
+      "sku": "HB-DEV-1111",
+      "name": "Single Board Computer Kit",
+      "description": "Training catalog item for HBntory integration: single board computer kit.",
+      "category": "Development Kits",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 84.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.28,
+      "tags": [
+        "embedded",
+        "kit",
+        "python"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 28,
+      "sku": "HB-DEV-1112",
+      "name": "Sensor Starter Kit",
+      "description": "Training catalog item for HBntory integration: sensor starter kit.",
+      "category": "Development Kits",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 39.9,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.22,
+      "tags": [
+        "sensors",
+        "iot",
+        "starter"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 29,
+      "sku": "HB-DEV-1113",
+      "name": "Breadboard Pack",
+      "description": "Training catalog item for HBntory integration: breadboard pack.",
+      "category": "Development Kits",
+      "brand": "Campus",
+      "supplier_id": "SUP-CMP-003",
+      "supplier_name": "Campus Components",
+      "unit_price": 12.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.13,
+      "tags": [
+        "electronics",
+        "breadboard",
+        "prototype"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 30,
+      "sku": "HB-ACC-1211",
+      "name": "HDMI Cable 1.5m",
+      "description": "Training catalog item for HBntory integration: hdmi cable 1.5m.",
+      "category": "Accessories",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 7.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.07,
+      "tags": [
+        "cable",
+        "hdmi",
+        "display"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 31,
+      "sku": "HB-ACC-1212",
+      "name": "USB-C Cable 1m",
+      "description": "Training catalog item for HBntory integration: usb-c cable 1m.",
+      "category": "Accessories",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 9.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.04,
+      "tags": [
+        "cable",
+        "usb-c",
+        "charging"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 32,
+      "sku": "HB-OLD-1301",
+      "name": "Legacy VGA Adapter",
+      "description": "Training catalog item for HBntory integration: legacy vga adapter.",
+      "category": "Accessories",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 15.99,
+      "currency": "USD",
+      "discontinued": true,
+      "weight_kg": 0.08,
+      "tags": [
+        "legacy",
+        "adapter",
+        "vga"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 33,
+      "sku": "HB-SEC-1401",
+      "name": "RFID Access Card Pack",
+      "description": "Training catalog item for HBntory integration: rfid access card pack.",
+      "category": "Security",
+      "brand": "WebCraft",
+      "supplier_id": "SUP-WEB-004",
+      "supplier_name": "WebCraft Devices",
+      "unit_price": 22.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.06,
+      "tags": [
+        "security",
+        "rfid",
+        "access"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 34,
+      "sku": "HB-SEC-1402",
+      "name": "USB Security Key",
+      "description": "Training catalog item for HBntory integration: usb security key.",
+      "category": "Security",
+      "brand": "WebCraft",
+      "supplier_id": "SUP-WEB-004",
+      "supplier_name": "WebCraft Devices",
+      "unit_price": 44.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.03,
+      "tags": [
+        "security",
+        "2fa",
+        "usb"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 35,
+      "sku": "HB-PRN-1501",
+      "name": "Label Printer",
+      "description": "Training catalog item for HBntory integration: label printer.",
+      "category": "Operations",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 119.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 1.2,
+      "tags": [
+        "printer",
+        "labels",
+        "warehouse"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 36,
+      "sku": "HB-LBL-1502",
+      "name": "Inventory Label Roll",
+      "description": "Training catalog item for HBntory integration: inventory label roll.",
+      "category": "Operations",
+      "brand": "OpsReady",
+      "supplier_id": "SUP-OPS-005",
+      "supplier_name": "OpsReady Warehouse",
+      "unit_price": 11.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.31,
+      "tags": [
+        "labels",
+        "inventory",
+        "warehouse"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 37,
+      "sku": "HB-SCN-1601",
+      "name": "Barcode Scanner USB",
+      "description": "Training catalog item for HBntory integration: barcode scanner usb.",
+      "category": "Operations",
+      "brand": "WebCraft",
+      "supplier_id": "SUP-WEB-004",
+      "supplier_name": "WebCraft Devices",
+      "unit_price": 69.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.25,
+      "tags": [
+        "barcode",
+        "scanner",
+        "warehouse"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 38,
+      "sku": "HB-TAB-1701",
+      "name": "Inventory Tablet 10",
+      "description": "Training catalog item for HBntory integration: inventory tablet 10.",
+      "category": "Mobile Devices",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 219.0,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.48,
+      "tags": [
+        "tablet",
+        "inventory",
+        "mobile"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 39,
+      "sku": "HB-TAB-1702",
+      "name": "Protective Tablet Case",
+      "description": "Training catalog item for HBntory integration: protective tablet case.",
+      "category": "Mobile Devices",
+      "brand": "Holberton",
+      "supplier_id": "SUP-HBT-001",
+      "supplier_name": "Holberton Tools Co.",
+      "unit_price": 24.99,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.17,
+      "tags": [
+        "tablet",
+        "case",
+        "protection"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    },
+    {
+      "id": 40,
+      "sku": "HB-LGT-1801",
+      "name": "Desk Lamp LED",
+      "description": "Training catalog item for HBntory integration: desk lamp led.",
+      "category": "Furniture",
+      "brand": "LabForge",
+      "supplier_id": "SUP-LAB-002",
+      "supplier_name": "LabForge Supplies",
+      "unit_price": 31.5,
+      "currency": "USD",
+      "discontinued": false,
+      "weight_kg": 0.64,
+      "tags": [
+        "lamp",
+        "desk",
+        "lighting"
+      ],
+      "updated_at": "2026-05-22T12:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+services:
+  external-products-api:
+    build: .
+    container_name: hbntory-external-products-api
+    environment:
+      HBN_PRODUCTS_PORT: "5000"
+      HBN_PRODUCTS_LATENCY_MS: "0"
+    ports:
+      - "5001:5000"
+    restart: unless-stopped

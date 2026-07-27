@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: HBntory External Product API
+  version: 1.1.0
+  description: >
+    Read-only supplier catalog used as an external dependency in the HBntory project.
+    This API exposes product catalog metadata only. Inventory quantities are managed
+    by the HBntory application built by students.
+servers:
+  - url: http://localhost:5001
+paths:
+  /health:
+    get:
+      summary: Check service health
+      responses:
+        '200':
+          description: Service is reachable
+  /api/v1/meta:
+    get:
+      summary: Describe service metadata and supported filters
+      responses:
+        '200':
+          description: Service metadata response
+  /api/v1/products:
+    get:
+      summary: List and filter supplier catalog products
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+          description: Search text matched against product name, SKU, description, and tags.
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: supplier_id
+          schema: { type: string }
+        - in: query
+          name: include_discontinued
+          schema: { type: boolean, default: false }
+        - in: query
+          name: min_price
+          schema: { type: number }
+        - in: query
+          name: max_price
+          schema: { type: number }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: offset
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [name, sku, category, unit_price, updated_at, -name, -sku, -category, -unit_price, -updated_at]
+      responses:
+        '200':
+          description: Product collection response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCollection'
+  /api/v1/products/search:
+    get:
+      summary: Search supplier catalog products
+      description: Alias of `/api/v1/products` with the `q` query parameter.
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Product search results
+  /api/v1/products/{identifier}:
+    get:
+      summary: Get product details by numeric id or SKU
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Product detail response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductWithSupplier'
+        '404':
+          description: Product not found
+  /api/v1/categories:
+    get:
+      summary: List categories and product counts
+      responses:
+        '200':
+          description: Category collection response
+  /api/v1/suppliers:
+    get:
+      summary: List suppliers
+      responses:
+        '200':
+          description: Supplier collection response
+components:
+  schemas:
+    ProductCollection:
+      type: object
+      properties:
+        count: { type: integer }
+        limit: { type: integer }
+        offset: { type: integer }
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    Product:
+      type: object
+      description: Product catalog metadata. Inventory quantities are intentionally excluded.
+      properties:
+        id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        description: { type: string }
+        category: { type: string }
+        brand: { type: string }
+        supplier_id: { type: string }
+        supplier_name: { type: string }
+        unit_price: { type: number }
+        currency: { type: string }
+        discontinued: { type: boolean }
+        weight_kg: { type: number }
+        tags:
+          type: array
+          items: { type: string }
+        updated_at: { type: string, format: date-time }
+    ProductWithSupplier:
+      allOf:
+        - $ref: '#/components/schemas/Product'
+        - type: object
+          properties:
+            supplier:
+              $ref: '#/components/schemas/Supplier'
+    Supplier:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        contact_email: { type: string }
+        country: { type: string }
+        lead_time_days: { type: integer }
+        reliability_score: { type: number }
