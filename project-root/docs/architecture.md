@@ -73,10 +73,12 @@ Authorization is enforced **on the backend**, never only in the UI.
 - **Benefit**: each client question is independent, no conversation history to maintain — REST is the simplest option and sufficient for the requirement.
 - **Trade-off**: no response streaming or real-time chat experience (which WebSocket would enable, but it's not a project requirement).
 
-### Decision 2  Stock access for the AI agent (extending MCP vs third-party MCP)
-- **Choice**: extend my own MCP server with read-only stock tools, rather than a third-party MCP Toolbox for Databases.
-- **Benefit**: a single MCP server to maintain and fully understand, and existing hands-on experience with FastMCP.
-- **Trade-off**: I have to guarantee myself that the exposed stock tools stay read-only (no built-in safeguard from a specialized third-party tool).
+### Decision 2  Stock access for the AI agent (extending MCP vs third-party MCP vs internal API)
+- **Choice**: extend my own MCP server with read-only stock tools, rather than a third-party MCP Toolbox for Databases, or a controlled internal API exposed by the Backoffice.
+- **Benefit**: a single MCP server to maintain and fully understand, existing hands-on experience with FastMCP, and a single place to observe/debug every tool call the agent makes (products and stock alike).
+- **Trade-off**: I have to guarantee myself that the exposed stock tools stay read-only (no built-in safeguard from a specialized third-party tool). The MCP server is also coupled to the Backoffice's DB schema, so a model change on Sagal's side can break it.
+- **Why not a third-party MCP Toolbox for Databases**: gives the agent flexible SQL-like access, which is harder to keep read-only and scoped, and weakens "clear boundaries" versus a small set of hand-written, single-purpose tools.
+- **Why not a controlled internal API in the Backoffice**: would require the AI Service to call the Backoffice directly, which breaks Decision 3 (Backoffice and AI Service are independent services that only share the database, never call each other) and adds an extra network hop/latency for no real benefit here.
 
 ### Decision 3  Backoffice / AI Service separation
 - **Choice**: two independent services sharing the same database.
@@ -92,6 +94,28 @@ Authorization is enforced **on the backend**, never only in the UI.
 - **Choice**: bcrypt
 - **Benefit**: built-in salting, resistant to brute-force, industry standard for password storage.
 - **Trade-off**: slightly slower than hashes not designed for passwords (plain SHA), which is actually the intended behavior here.
+
+### Decision 6  AI agent integration style (direct SDK vs orchestration framework)
+- **Choice**: call the LLM provider's API directly and write the tool-calling loop by hand, instead of using an orchestration library (LangChain, LlamaIndex).
+- **Benefit**: the tool-calling loop (send tools, get a tool call back, run it, send the result back) stays fully visible in our own code, which makes it easy to observe and debug which tool calls the agent makes, a project requirement. It also avoids pulling in a large dependency and its own abstractions for a need that stays simple: one agent, one MCP server, no multi-turn memory.
+- **Trade-off**: we have to write the loop ourselves (a few dozen lines), and we would not get the orchestration framework's built-in features (multi-agent, memory, RAG) for free if the project grew.
+
+### Decision 7  LLM provider
+- **Choice**: Groq, not the Anthropic API or Google Gemini.
+- **Benefit**: free to use, no payment method required, and its API follows the same message/tool format as OpenAI, which is the most common and best documented format, and is close to the general tool-use pattern used everywhere else in this project. This makes Decision 6 (hand-written tool loop) simple to implement.
+- **Trade-off**: the models available on Groq are open-source models, not Claude, so they may be somewhat less reliable at deciding when and how to call a tool than a frontier model. Mitigated by keeping the tool set small (4 tools) and well-described.
+
+### Decision 8  Supported question scope enforcement
+
+- **Choice**: enforce the "only answer these 4 question types" rule through the agent's system prompt, in the same LLM call that answers the question, instead of a separate classification step beforehand.
+- **Benefit**: one LLM call instead of two, simpler code, matches the two-week project scope.
+- **Trade-off**: less predictable than a dedicated classifier on ambiguous edge-case questions, since the same call both judges scope and answers.
+
+### Decision 9  Response language
+
+- **Choice**: no fixed response language. The agent answers in whichever language the question was asked in (French or English).
+- **Benefit**: no extra configuration needed, this is native behavior for the LLM, and it fits a public client with an unknown audience.
+- **Trade-off**: none identified for this project's scope.
 
 ## 7. MVP
 

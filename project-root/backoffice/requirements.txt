@@ -1,4 +1,6 @@
 Flask
 Flask-SQLAlchemy
+Flask-Login
 bcrypt
-requestsFlask-Cors
+requests
+Flask-Cors
