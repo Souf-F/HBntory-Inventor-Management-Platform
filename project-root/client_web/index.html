@@ -125,7 +125,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:44px;">
           <div style="flex:1 1 220px;background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:26px;position:relative;">
             <div style="position:absolute;top:0;left:0;width:100%;height:8px;background:#17C3D6;"></div>
-            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;">3 214</div>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;">{{ productCount }}</div>
             <div style="font-size:14px;font-weight:600;color:var(--muted);margin-top:6px;">Références produits</div>
           </div>
           <div style="flex:1 1 220px;background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:26px;position:relative;">
@@ -156,7 +156,6 @@
         <sc-if value="{{ showDemo }}" hint-placeholder-val="{{ true }}">
           <div style="background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:30px;">
             <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;margin-bottom:4px;">Tester l'ajout d'un produit</div>
-            <div style="font-size:13px;font-style:italic;color:var(--muted);margin-bottom:20px;">Démo locale — aucun appel serveur, uniquement dans votre navigateur.</div>
             <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
               <input type="text" placeholder="ID produit (ex : 4821)" value="{{ demoId }}" onChange="{{ onDemoIdChange }}" onKeyDown="{{ onDemoKeyDown }}" style="flex:1 1 240px;padding:14px 16px;border:3px solid var(--border);font-family:'Space Grotesk',sans-serif;font-size:15px;background:var(--bg);" />
               <div style="{{ buttons.add.base }}" style-hover="{{ buttons.add.hover }}" style-active="{{ buttons.add.active }}" onClick="{{ onDemoAdd }}">Ajouter</div>
@@ -629,6 +628,7 @@ class Component extends DCLogic {
 
     return {
       isMobile, isDesktop, isDark, toggleDark: this.toggleDark, appRootStyle,
+      productCount: (s.catalogProducts || []).length || "—",
       darkLabel: isDark ? "Mode clair" : "Mode sombre",
       darkToggleGlyph: isDark ? "☀" : "☾",
       buttons2: { toggle: toggleBtn },
