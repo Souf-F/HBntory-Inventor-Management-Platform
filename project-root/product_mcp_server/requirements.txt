@@ -1,0 +1,6 @@
+fastmcp
+requests
+flask
+flask-sqlalchemy
+flask-login
+flask-cors
