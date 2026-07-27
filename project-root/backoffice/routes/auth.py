@@ -38,7 +38,8 @@ def login():
     return jsonify({
         "status": "success",
         "username": user.username,
-        "role": user.role.value
+        "role": user.role.value,
+        "branch_id": user.branch_id
     })
 
 
