@@ -9,19 +9,19 @@ Team project: Sagal-Louise Haider, Souf, Noham
 ```mermaid
 flowchart TD
   subgraph Backoffice["Backoffice (Souf + Sagal)"]
-    A[Common user] -->|gere stock branche| C[Routes stock]
-    B[Admin] -->|gere users| D[Routes admin]
+    A[Common user] -->|manages branch stock| C[Stock routes]
+    B[Admin] -->|manages users| D[Admin routes]
   end
-  C --> DB[(Base de donnees<br/>users, branches, stock)]
+  C --> DB[(Database<br/>users, branches, stock)]
   D --> DB
-  C -.->|affichage produit, jamais stocke| H[Product API externe]
-  subgraph IA["MCP + IA (Noham)"]
-    F[AI Query Service] -->|appelle tools| G[MCP Server]
+  C -.->|product display, never stored| H[External Product API]
+  subgraph IA["MCP + AI (Noham)"]
+    F[AI Query Service] -->|calls tools| G[MCP Server]
   end
-  G -->|lit produits| H
-  G -->|lit stock| DB
-  E[Interface client publique] -->|question REST| F
-  F -->|reponse| E
+  G -->|reads products| H
+  G -->|reads stock| DB
+  E[Public client interface] -->|REST question| F
+  F -->|response| E
 ```
 
 ## 2. Components and responsibilities
