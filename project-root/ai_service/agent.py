@@ -93,9 +93,7 @@ def _tool_result_to_text(result) -> str:
 async def ask(question: str) -> str:
     """Answer one question end-to-end: discover tools, run the tool-calling
     loop against Groq, return the final text answer."""
-    groq_client = AsyncGroq()
-
-    async with Client(MCP_URL) as mcp_client:
+    async with AsyncGroq() as groq_client, Client(MCP_URL) as mcp_client:
         mcp_tools = await mcp_client.list_tools()
         tools = [_mcp_tool_to_groq_tool(tool) for tool in mcp_tools]
 

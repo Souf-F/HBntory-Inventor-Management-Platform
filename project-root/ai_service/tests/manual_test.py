@@ -1,11 +1,16 @@
 """
 Manual test script for the AI agent (task 5, step 2/3).
 
+Superseded for regular use by test_agent_live.py (same questions, but
+with automatic pass/fail assertions instead of output you read by eye).
+Kept for a quick, readable, human-eyeballed sanity check when you want
+to see the full model reasoning and tool calls scroll by.
+
 Usage:
     1. Start the real Product API (see product_mcp_server/README.md).
     2. Start the MCP server:  cd product_mcp_server && python server.py
     3. In another terminal, with GROQ_API_KEY set in .env:
-           cd ai_service && python manual_test.py
+           cd ai_service && python -m tests.manual_test
 """
 
 import asyncio
