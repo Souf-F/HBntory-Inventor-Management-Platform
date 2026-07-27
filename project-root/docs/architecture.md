@@ -14,16 +14,15 @@ flowchart TD
   end
   C --> DB[(Base de donnees<br/>users, branches, stock)]
   D --> DB
+  C -.->|affichage produit, jamais stocke| H[Product API externe]
   subgraph IA["MCP + IA (Noham)"]
     F[AI Query Service] -->|appelle tools| G[MCP Server]
   end
-  G -->|lit produits| H[Product API externe]
+  G -->|lit produits| H
   G -->|lit stock| DB
   E[Interface client publique] -->|question REST| F
   F -->|reponse| E
 ```
-
-> Note: this diagram doesn't show the Backoffice → Product API link. Per the golden rule (section 3), the Backoffice does call the Product API on the fly for display purposes (e.g. populating a product picker) without ever persisting that data. Worth adding once the team agrees on how to represent it.
 
 ## 2. Components and responsibilities
 
@@ -31,7 +30,7 @@ flowchart TD
 |---|---|---|---|
 | **Backoffice** | Authenticated web app. Admin manages users, common user manages stock for their branch. | Read/write (users, stock) | Read, on the fly (display only, never persisted) |
 | **Database** | Single schema shared between the Backoffice and the AI Service: `users`, `branches`, `stock`. Stores **no** product data, only the `product_id`. | - | - |
-| **Product API** | Provided as a Docker container, read-only. Single source of truth for product name, description, price, and image. | - | - |
+| **Product API** | Provided by the school, read-only. Plain Python (`http.server`), no Docker required, run with `python3 app.py`. Single source of truth for product name, description, price, and image. | - | - |
 | **MCP Server** | Bridge between the AI Service and the data sources. Exposes tools to list/detail products (via the Product API) and to query stock (read-only on the DB). | Read-only (stock) | Read |
 | **AI Service** | Independent from the Backoffice. One or more agents process natural-language questions from the Client Web via the MCP Server tools. Never invents an answer, clearly states when information is unavailable. | Read-only (stock, via MCP) | Read (via MCP) |
 | **Client Web** | Public, anonymous page, chat or search-box style. Each question is handled independently (no history stored). | - | - |
@@ -101,7 +100,7 @@ The MVP targets one working end-to-end path first, proving the full system integ
 ### Must-have (core MVP)
 - **Database**: `users`, `branches`, `stock` models, with `quantity >= 0` enforced at the DB level.
 - **Auth**: bcrypt password hashing, login for admin and common users, role enforced on the backend.
-- **Backoffice (SSR)**:
+- **Backoffice (REST API)**:
   - Admin: list/create/modify common users, assign branch, soft-delete, change password.
   - Common user: add/remove/consult stock, scoped to their assigned branch.
 - **Product API integration**: basic read-only calls from the Backoffice and from the MCP server (no product data ever persisted locally).
