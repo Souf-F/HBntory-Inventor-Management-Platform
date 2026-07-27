@@ -109,7 +109,7 @@ flowchart TD
     style DB fill:#EAF3DE,stroke:#27500A
 ```
 
-**Key point**: the Backoffice and the AI side never communicate directly — they only share the same database. The Backoffice writes stock into it, the MCP Server reads it to answer public questions.
+**Key point**: the Backoffice and the AI side never communicate directly, they only share the same database. The Backoffice writes stock into it, the MCP Server reads it to answer public questions.
 
 ---
 
@@ -143,7 +143,7 @@ erDiagram
     }
 ```
 
-**Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`) — never its name, price, or description. That information is always fetched on demand from the Product API.
+**Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`), never its name, price, or description. That information is always fetched on demand from the Product API.
 
 ---
 
@@ -210,7 +210,7 @@ The Backoffice is a classic internal use case consumed by a single type of clien
 
 ### 3. Authorization enforced exclusively on the backend
 
-Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface — a common user manually tampering with an HTTP request would still be blocked by the server.
+Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface, a common user manually tampering with an HTTP request would still be blocked by the server.
 
 ### 4. REST rather than WebSocket for the public client
 
@@ -218,7 +218,7 @@ Each question sent to the chat is independent (no conversation history required 
 
 ### 5. Soft-delete rather than physical deletion
 
-A deactivated user (`is_active = False`) can no longer log in, but their past stock movements remain intact in the database — matching the spec's requirement.
+A deactivated user (`is_active = False`) can no longer log in, but their past stock movements remain intact in the database, matching the spec's requirement.
 
 ---
 
