@@ -118,7 +118,7 @@
   <div style="{{ mainWrapStyle }}">
     <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
       <div>
-        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#F5B700;background:#16130F;display:inline-block;padding:5px 12px;margin-bottom:14px;">01 — HBntory</div>
+        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#F5B700;background:#16130F;display:inline-block;padding:5px 12px;margin-bottom:14px;">01 HBntory</div>
         <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1.05;margin:0 0 10px;">Tableau de bord</h1>
         <p style="font-size:16px;color:var(--muted);max-width:560px;margin:0 0 36px;">Vue d'ensemble du réseau HBntory : branches, références produits et disponibilité de l'assistant.</p>
 
@@ -138,69 +138,32 @@
           </div>
         </div>
 
-        <div style="display:flex;flex-wrap:wrap;gap:24px;margin-bottom:48px;">
+        <div style="display:flex;flex-wrap:wrap;gap:24px;">
           <div style="flex:1 1 360px;background:#7B2FF7;color:#fff;border:3px solid var(--border);box-shadow:8px 8px 0 var(--shadowColor);padding:34px;position:relative;overflow:hidden;">
             <div style="position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;border:4px solid rgba(255,255,255,0.35);"></div>
             <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;margin-bottom:10px;">Une question sur le stock ?</div>
             <p style="font-size:15px;line-height:1.5;margin:0 0 22px;max-width:380px;">Demandez à l'assistant HBntory : disponibilité produit, stock par branche, tout en une question.</p>
-            <div style="{{ buttons.chat.base }}" style-hover="{{ buttons.chat.hover }}" style-active="{{ buttons.chat.active }}" onClick="{{ goChat }}">Ouvrir le chat →</div>
+            <div style="{{ buttons.chat.base }}" style-hover="{{ buttons.chat.hover }}" style-active="{{ buttons.chat.active }}" onClick="{{ goChat }}">Ouvrir le chat</div>
           </div>
           <div style="flex:1 1 360px;background:#FF5A1F;color:var(--ink);border:3px solid var(--border);box-shadow:8px 8px 0 var(--shadowColor);padding:34px;position:relative;overflow:hidden;">
             <div style="position:absolute;bottom:-30px;right:20px;width:0;height:0;border-left:36px solid transparent;border-right:36px solid transparent;border-bottom:64px solid rgba(22,19,15,0.15);"></div>
             <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;margin-bottom:10px;">Explorez le catalogue</div>
             <p style="font-size:15px;line-height:1.5;margin:0 0 22px;max-width:380px;">Parcourez toutes les références et leur disponibilité par branche, sans passer par le chat.</p>
-            <div style="{{ buttons.products.base }}" style-hover="{{ buttons.products.hover }}" style-active="{{ buttons.products.active }}" onClick="{{ goProducts }}">Voir les produits →</div>
+            <div style="{{ buttons.products.base }}" style-hover="{{ buttons.products.hover }}" style-active="{{ buttons.products.active }}" onClick="{{ goProducts }}">Voir les produits</div>
           </div>
         </div>
-
-        <sc-if value="{{ showDemo }}" hint-placeholder-val="{{ true }}">
-          <div style="background:var(--surface);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadowColor);padding:30px;">
-            <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;margin-bottom:4px;">Tester l'ajout d'un produit</div>
-            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
-              <input type="text" placeholder="ID produit (ex : 4821)" value="{{ demoId }}" onChange="{{ onDemoIdChange }}" onKeyDown="{{ onDemoKeyDown }}" style="flex:1 1 240px;padding:14px 16px;border:3px solid var(--border);font-family:'Space Grotesk',sans-serif;font-size:15px;background:var(--bg);" />
-              <div style="{{ buttons.add.base }}" style-hover="{{ buttons.add.hover }}" style-active="{{ buttons.add.active }}" onClick="{{ onDemoAdd }}">Ajouter</div>
-            </div>
-            <div style="overflow-x:auto;">
-              <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:560px;">
-                <thead>
-                  <tr style="background:#F5B700;">
-                    <th style="border:3px solid var(--border);padding:10px 14px;text-align:left;font-family:'Baloo 2',sans-serif;text-transform:uppercase;font-size:12px;letter-spacing:.05em;">ID</th>
-                    <th style="border:3px solid var(--border);padding:10px 14px;text-align:left;font-family:'Baloo 2',sans-serif;text-transform:uppercase;font-size:12px;letter-spacing:.05em;">Produit</th>
-                    <th style="border:3px solid var(--border);padding:10px 14px;text-align:left;font-family:'Baloo 2',sans-serif;text-transform:uppercase;font-size:12px;letter-spacing:.05em;">Branche</th>
-                    <th style="border:3px solid var(--border);padding:10px 14px;text-align:left;font-family:'Baloo 2',sans-serif;text-transform:uppercase;font-size:12px;letter-spacing:.05em;">Stock</th>
-                    <th style="border:3px solid var(--border);padding:10px 14px;text-align:left;font-family:'Baloo 2',sans-serif;text-transform:uppercase;font-size:12px;letter-spacing:.05em;">Ajouté à</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <sc-for list="{{ demoRows }}" as="row" hint-placeholder-count="0">
-                    <tr style="background:var(--surface);">
-                      <td style="border:3px solid var(--border);padding:10px 14px;font-weight:600;">{{ row.id }}</td>
-                      <td style="border:3px solid var(--border);padding:10px 14px;">{{ row.name }}</td>
-                      <td style="border:3px solid var(--border);padding:10px 14px;">{{ row.branch }}</td>
-                      <td style="border:3px solid var(--border);padding:10px 14px;">{{ row.stock }}</td>
-                      <td style="border:3px solid var(--border);padding:10px 14px;color:var(--muted);">{{ row.addedAt }}</td>
-                    </tr>
-                  </sc-for>
-                  <sc-if value="{{ noDemoRows }}" hint-placeholder-val="{{ false }}">
-                    <tr><td colspan="5" style="border:3px solid var(--border);padding:16px;text-align:center;color:var(--muted);font-style:italic;">Aucun produit ajouté pour l'instant.</td></tr>
-                  </sc-if>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </sc-if>
       </div>
     </sc-if>
 
     <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;flex-direction:column;">
-        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:#F0208B;display:inline-block;padding:5px 12px;margin-bottom:14px;">02 — Assistant</div>
+        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:#F0208B;display:inline-block;padding:5px 12px;margin-bottom:14px;">02 Assistant</div>
         <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;line-height:1.05;margin:0 0 8px;">Assistant IA HBntory</h1>
         <p style="font-size:15px;color:var(--muted);margin:0 0 20px;">Posez une question sur le stock, les branches ou les produits.</p>
 
         <div style="{{ chatPanelStyle }}">
           <sc-if value="{{ noChatMessages }}" hint-placeholder-val="{{ true }}">
-            <div style="color:var(--muted);font-style:italic;font-size:14px;">Aucune question posée pour l'instant — essayez l'une des suggestions ci-dessous.</div>
+            <div style="color:var(--muted);font-style:italic;font-size:14px;">Aucune question posée pour l'instant, essayez l'une des suggestions ci-dessous.</div>
           </sc-if>
           <sc-for list="{{ chatBubbles }}" as="msg" hint-placeholder-count="0">
             <div style="{{ msg.wrapStyle }}">
@@ -229,14 +192,14 @@
 
         <div style="display:flex;gap:12px;">
           <input type="text" placeholder="Écrivez votre question…" value="{{ chatInput }}" onChange="{{ onChatInputChange }}" onKeyDown="{{ onChatKeyDown }}" style="flex:1;padding:16px 18px;border:3px solid var(--border);font-size:15px;font-family:'Space Grotesk',sans-serif;background:var(--surface);" />
-          <div style="{{ buttons.send.base }}" style-hover="{{ buttons.send.hover }}" style-active="{{ buttons.send.active }}" onClick="{{ onChatSendClick }}">Envoyer →</div>
+          <div style="{{ buttons.send.base }}" style-hover="{{ buttons.send.hover }}" style-active="{{ buttons.send.active }}" onClick="{{ onChatSendClick }}">Envoyer</div>
         </div>
       </div>
     </sc-if>
 
     <sc-if value="{{ isProducts }}" hint-placeholder-val="{{ false }}">
       <div>
-        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:#17C3D6;display:inline-block;padding:5px 12px;margin-bottom:14px;">03 — Produits</div>
+        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:#17C3D6;display:inline-block;padding:5px 12px;margin-bottom:14px;">03 Produits</div>
         <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;line-height:1.05;margin:0 0 8px;">Catalogue produits</h1>
         <p style="font-size:15px;color:var(--muted);margin:0 0 28px;max-width:600px;">Consultez les références disponibles et leur stock par branche.</p>
 
@@ -282,7 +245,7 @@
 
     <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
       <div>
-        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:#7B2FF7;display:inline-block;padding:5px 12px;margin-bottom:14px;">04 — À propos</div>
+        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:#7B2FF7;display:inline-block;padding:5px 12px;margin-bottom:14px;">04 À propos</div>
         <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;line-height:1.05;margin:0 0 28px;">À propos de HBntory</h1>
 
         <div style="background:var(--surface);border:3px solid var(--border);box-shadow:8px 8px 0 var(--shadowColor);padding:32px;margin-bottom:28px;">
@@ -326,7 +289,7 @@
 
     <sc-if value="{{ isContact }}" hint-placeholder-val="{{ false }}">
       <div>
-        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:#FF5A1F;display:inline-block;padding:5px 12px;margin-bottom:14px;">05 — Contact</div>
+        <div style="font-weight:700;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:#FF5A1F;display:inline-block;padding:5px 12px;margin-bottom:14px;">05 Contact</div>
         <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;line-height:1.05;margin:0 0 10px;">Nous contacter</h1>
         <p style="font-size:16px;color:var(--muted);max-width:560px;margin:0 0 32px;">Une question, une suggestion ? Écrivez-nous.</p>
 
@@ -366,8 +329,7 @@
 <script type="text/x-dc" data-dc-script data-props="{
   &quot;$preview&quot;: {&quot;width&quot;: 1440, &quot;height&quot;: 900},
   &quot;chatApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:8100/ask&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
-  &quot;productsApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:5001/api/v1/products?limit=100&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;},
-  &quot;showDemoSection&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Configuration&quot;}
+  &quot;productsApiUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;http://127.0.0.1:5001/api/v1/products?limit=100&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Configuration&quot;}
 }">
 class Component extends DCLogic {
   static CHAT_API_URL = "http://127.0.0.1:8100/ask";
@@ -376,8 +338,6 @@ class Component extends DCLogic {
   state = {
     page: "dashboard",
     isMobile: typeof window !== "undefined" && window.innerWidth < 860,
-    demoId: "",
-    demoRows: [],
     chatMessages: [],
     chatInput: "",
     chatLoading: false,
@@ -431,39 +391,6 @@ class Component extends DCLogic {
       flex: 1, cursor: "pointer", color: active ? (isDark ? "#7B2FF7" : color) : "var(--ink)", fontWeight: 700
     };
   }
-
-  generateProductName(id) {
-    const ADJ = ["Ultra", "Nova", "Prime", "Éco", "Turbo", "Méga", "Néo", "Vif", "Rapide", "Solide"];
-    const NOUN = ["Module", "Capteur", "Kit", "Support", "Boîtier", "Adaptateur", "Câble", "Panneau", "Filtre", "Unité"];
-    const s = String(id);
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
-    return ADJ[hash % ADJ.length] + " " + NOUN[Math.floor(hash / 7) % NOUN.length] + " " + s;
-  }
-
-  pickBranch(id) {
-    const BRANCHES = ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux", "Lille", "Nantes", "Strasbourg"];
-    const s = String(id) + "b";
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
-    return BRANCHES[hash % BRANCHES.length];
-  }
-
-  pickStock(id) {
-    const s = String(id) + "s";
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
-    return hash % 120;
-  }
-
-  onDemoIdChange = (e) => this.setState({ demoId: e.target.value });
-  onDemoKeyDown = (e) => { if (e.key === "Enter") this.onDemoAdd(); };
-  onDemoAdd = () => {
-    const id = this.state.demoId.trim();
-    if (!id) return;
-    const row = { id, name: this.generateProductName(id), branch: this.pickBranch(id), stock: this.pickStock(id), addedAt: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) };
-    this.setState((s) => ({ demoRows: [row, ...s.demoRows], demoId: "" }));
-  };
 
   onChatInputChange = (e) => this.setState({ chatInput: e.target.value });
   onChatKeyDown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); this.handleSend(); } };
@@ -555,7 +482,7 @@ class Component extends DCLogic {
       "HB-LGT-1801": "Lampe de bureau LED"
     };
     const palette = ["#F0208B", "#17C3D6", "#F5B700", "#FF5A1F", "#7B2FF7"];
-    // The Product API never returns product images (see the sample response —
+    // The Product API never returns product images (see the sample response,
     // only identifiers, names, categories, prices, tags). Rather than call an
     // external image service that could fail during the demo, each category
     // gets a fixed representative icon instead.
@@ -573,14 +500,14 @@ class Component extends DCLogic {
     };
     const catalogCards = (s.catalogProducts || []).map((p, i) => {
       // The Product API never returns stock (by design, see architecture.md
-      // golden rule) — stock only exists per branch, in our own database.
+      // golden rule), stock only exists per branch, in our own database.
       // Show product info here; use the Assistant to ask about availability.
       return {
-        id: p.sku || p.id, name: NAME_FR[p.sku] || p.name || "Produit", branch: p.category || "—",
+        id: p.sku || p.id, name: NAME_FR[p.sku] || p.name || "Produit", branch: p.category || "",
         initial: CATEGORY_ICONS[p.category] || "\uD83D\uDCE6",
         // Looks for a manually-added image at assets/products/<sku>.png.
         // If it 404s, the inline onerror above hides it and the category
-        // icon underneath stays visible — no broken-image icon shown.
+        // icon underneath stays visible, no broken-image icon shown.
         imageSrc: "assets/products/" + (p.sku || p.id) + ".png",
         thumbStyle: { position: "relative", height: "150px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "40px", background: palette[i % palette.length], overflow: "hidden" },
         stockLabel: p.unit_price != null ? (p.unit_price + " " + (p.currency || "")) : "Prix non communiqué",
@@ -628,7 +555,7 @@ class Component extends DCLogic {
 
     return {
       isMobile, isDesktop, isDark, toggleDark: this.toggleDark, appRootStyle,
-      productCount: (s.catalogProducts || []).length || "—",
+      productCount: (s.catalogProducts || []).length || "",
       darkLabel: isDark ? "Mode clair" : "Mode sombre",
       darkToggleGlyph: isDark ? "☀" : "☾",
       buttons2: { toggle: toggleBtn },
@@ -640,13 +567,9 @@ class Component extends DCLogic {
       buttons: {
         chat: this.makeButton("#FFFFFF", "#7B2FF7"),
         products: this.makeButton("#FFFFFF", "#16130F"),
-        add: this.makeButton("#F5B700", "#16130F"),
         send: this.makeButton("#F0208B", "#FFFFFF"),
         retry: this.makeButton("#16130F", "#FBF1DC")
       },
-      showDemo: this.props.showDemoSection ?? true,
-      demoId: s.demoId, onDemoIdChange: this.onDemoIdChange, onDemoKeyDown: this.onDemoKeyDown, onDemoAdd: this.onDemoAdd,
-      demoRows: s.demoRows, noDemoRows: s.demoRows.length === 0,
       chatPanelStyle: { flex: 1, overflowY: "auto", background: "var(--surface)", border: "3px solid var(--border)", boxShadow: "6px 6px 0 var(--shadowColor)", padding: "22px", display: "flex", flexDirection: "column", gap: "14px", marginBottom: "16px", height: isMobile ? "calc(100vh - 250px)" : "calc(100vh - 180px)", minHeight: "440px" },
       chatBubbles, noChatMessages: s.chatMessages.length === 0 && !s.chatLoading,
       chatLoading: s.chatLoading, chips,
