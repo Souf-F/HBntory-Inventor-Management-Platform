@@ -32,7 +32,17 @@ def create_app(config_class=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        """Reject soft-deleted accounts on every request, not just at login.
+
+        Flask-Login calls this on each request to rebuild current_user from
+        the session cookie. Without the is_active check here, a user the
+        admin deactivates mid-session would keep working until they log out
+        on their own.
+        """
+        user = User.query.get(int(user_id))
+        if user is None or not user.is_active:
+            return None
+        return user
 
     # --- Blueprints ---
     from routes.auth import auth_bp

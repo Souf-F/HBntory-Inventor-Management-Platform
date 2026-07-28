@@ -426,7 +426,12 @@ class Component extends DCLogic {
     }
   };
 
-  logout = () => this.setState({ loggedIn: false, view: 'list', currentRole: null, currentBranchId: null });
+  logout = async () => {
+    // Destroy the server-side session, not just the local React state:
+    // clearing state alone leaves the session cookie valid.
+    await this.api('/logout', { method: 'POST' });
+    this.setState({ loggedIn: false, view: 'list', currentRole: null, currentBranchId: null, currentUsername: null });
+  };
   toggleDark = () => this.setState(s => ({ dark: !s.dark }));
 
   goToList = () => this.setState({ view: 'list', createError: '', editError: '' });
