@@ -198,7 +198,7 @@ HBntory-Inventor-Management-Platform/
     │   ├── product_api_client.py            # Calls the external Product API
     │   ├── db.py                             # Read-only access to the shared database
     │   ├── tools/
-    │   │   ├── products.py                    # list_products, get_product_details
+    │   │   ├── products.py                    # list_products, get_product_details, search_products
     │   │   └── stock.py                        # check_stock, list_branch_stock, check_shopping_list
     │   ├── manual_test.py
     │   ├── requirements.txt
@@ -229,7 +229,7 @@ HBntory-Inventor-Management-Platform/
         ├── authentication.md                  # Authentication and authorization strategy
         ├── database.md                         # Schema, models, seeding, validation rules
         ├── ui-backend-approach.md               # REST vs SSR decision, frontend stack, CORS
-        ├── test.md                               # Tests and fixed vulnerabilities, per member
+        ├── tests.md                              # Tests and fixed vulnerabilities, per member
         ├── product_mcp_server.md                  # Full MCP server documentation
         └── ai_service.md                           # Full AI Query Service documentation
 ```
@@ -367,11 +367,10 @@ branch.
 
 ## Example questions for the assistant
 
-- *"Where can I find product X?"*
-- *"What products are available in branch Y?"*
-- *"I need 3 units of X, 2 of Y and 4 of Z, which branch(es) can I visit?"*
-- *"Give me the details for product XX"*
-- *"Tell me about product HB-ZZZ-9999"* — unknown product: the assistant states the information is unavailable rather than inventing it
+- *"Where can I find the 24 inch Compact Monitor?"*
+- *"What products are available at HBntory Paris?"*
+- *"I need 3 units of 8-Port Managed Switch and 2 of Barcode Scanner USB, which branch(es) can supply all of it?"*
+- *"Give me the details of product HB-MON-2102"*
 
 The agent answers in the language the question was asked in, French or English.
 
@@ -406,7 +405,7 @@ The agent answers in the language the question was asked in, French or English.
 | `mcp_instance.py` | Shared FastMCP instance |
 | `product_api_client.py` | Calls the external Product API on behalf of the tools |
 | `db.py` | Read-only access to the shared database, reusing the Backoffice models |
-| `tools/products.py` | `list_products`, `get_product_details` |
+| `tools/products.py` | `list_products`, `get_product_details`, `search_products` |
 | `tools/stock.py` | `check_stock`, `list_branch_stock`, `check_shopping_list` |
 
 ### `ai_service/`
@@ -444,7 +443,7 @@ The agent answers in the language the question was asked in, French or English.
 ## Tests performed
 
 Every test is documented per team member, along with the vulnerabilities found and the file
-fixed for each, in [`docs/test.md`](project-root/docs/test.md).
+fixed for each, in [`docs/tests.md`](project-root/docs/tests.md).
 
 | Area | Coverage | Method |
 |---|---|---|
@@ -473,6 +472,7 @@ One point of attention is carried forward to Task 6 (Client Web Interface): data
 - **`db.create_all()` does not migrate.** It creates missing tables but never alters existing ones, so a database created before a constraint was added will not gain it. During development the fix is to delete the file and re-seed; Alembic would be the production answer.
 - **SQLite serializes writes.** Sufficient for the project's scope. `SQLALCHEMY_DATABASE_URI` is environment-overridable, so moving to PostgreSQL requires no code change.
 - **No SSL/TLS**, explicitly out of scope per the project brief.
+- **AI assistant reliability depends on the Groq free tier.** Under heavy testing, the AI Query Service occasionally returns a generic "technical problem" or "rate limit reached" error even for a well-formed question, since the underlying model or API quota is temporarily unavailable. Retrying the same question shortly after typically succeeds.
 
 ---
 
