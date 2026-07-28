@@ -17,11 +17,6 @@ Reads `PRODUCT_API_URL` from the environment (defaults to
 (defaults to the Backoffice's local SQLite file). The MCP server itself
 listens on `MCP_PORT` (defaults to `8000`), transport `streamable-http`.
 
-With Docker Compose (see `docker-compose.yml` at the repo root), this
-service's image is built with `project-root/` as its context, not
-`product_mcp_server/`, so the Dockerfile can also copy
-`backoffice/app/` in (see "Stock tools" below).
-
 ## Product tools
 
 ### `list_products(category: str | None = None, limit: int = 20) -> list[ProductSummary]`
