@@ -19,9 +19,17 @@ def verify_password(password, hashed):
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
+    # silent=True keeps a malformed or missing JSON body from raising a raw
+    # 400/500 out of Flask before we get a chance to answer properly.
+    data = request.get_json(silent=True) or {}
     username = data.get("username")
     password = data.get("password")
+
+    # Missing fields are answered exactly like bad credentials, on purpose:
+    # the caller learns nothing about which part was wrong. Without this,
+    # verify_password() would call .encode() on None and raise a 500.
+    if not username or not password:
+        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
     user = User.query.filter_by(username=username).first()
 

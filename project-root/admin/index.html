@@ -260,6 +260,7 @@
         <thead>
           <tr>
             <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">ID Produit</th>
+            <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Produit</th>
             <th style="text-align:left; font-size:12px; color:{{ theme.muted }}; font-weight:600; padding:12px 18px; border-bottom:2px solid {{ theme.border }}; text-transform:uppercase; letter-spacing:0.03em;">Quantité</th>
           </tr>
         </thead>
@@ -267,6 +268,7 @@
           <sc-for list="{{ stockItems }}" as="s" hint-placeholder-count="3">
             <tr>
               <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; font-weight:600; color:{{ theme.text }};">{{ s.product_id }}</td>
+              <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; color:{{ theme.text }};">{{ s.product_name }}</td>
               <td style="padding:14px 18px; font-size:14px; border-bottom:1px solid {{ theme.rowBorder }}; color:{{ theme.text }};">{{ s.quantity }}</td>
             </tr>
           </sc-for>
@@ -424,7 +426,12 @@ class Component extends DCLogic {
     }
   };
 
-  logout = () => this.setState({ loggedIn: false, view: 'list', currentRole: null, currentBranchId: null });
+  logout = async () => {
+    // Destroy the server-side session, not just the local React state:
+    // clearing state alone leaves the session cookie valid.
+    await this.api('/logout', { method: 'POST' });
+    this.setState({ loggedIn: false, view: 'list', currentRole: null, currentBranchId: null, currentUsername: null });
+  };
   toggleDark = () => this.setState(s => ({ dark: !s.dark }));
 
   goToList = () => this.setState({ view: 'list', createError: '', editError: '' });
@@ -706,7 +713,11 @@ class Component extends DCLogic {
       cancelDelete: this.cancelDelete,
       confirmDelete: this.confirmDelete,
       // PATCH 5 (cont.): stock view bindings
-      stockItems: this.state.stockItems,
+      stockItems: this.state.stockItems.map(s => ({
+        product_id: s.product_id,
+        product_name: s.product_name || '—',
+        quantity: s.quantity,
+      })),
       stockForm: this.state.stockForm,
       stockError: this.state.stockError,
       onStockProductChange: this.onStockProductChange,

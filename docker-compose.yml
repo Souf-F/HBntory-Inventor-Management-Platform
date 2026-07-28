@@ -1,51 +1,77 @@
-version: "3.9"
-
 services:
 
   backoffice:
     build:
-      context: ./backoffice
-      dockerfile: ../Dockerfile.backoffice
+      context: ./project-root/backoffice
     container_name: hbntory_backoffice
     ports:
       - "5000:5000"
     environment:
       - FLASK_ENV=development
       - SECRET_KEY=change_me_in_production
-      - DATABASE_URL=sqlite:///hbntory.db
+      # Shared with mcp_server below, via the backoffice_data volume, so
+      # both services read/write the same SQLite file (see architecture.md,
+      # Decision 2 and section 3: single shared database).
+      - DATABASE_URL=sqlite:////data/hbntory.db
+      - PRODUCT_API_URL=http://product_api:5000
     volumes:
-      - backoffice_data:/app/instance
+      - backoffice_data:/data
+    depends_on:
+      - product_api
     restart: unless-stopped
 
-  # Provided by the project spec, run from the school-provided image/repo.
-  # Adjust the build context and port once the product-api repo is set up.
+  # Provided by the project spec (https://github.com/hbtn-edu/hbntory-products-api),
+  # run from the school-provided repo, cloned locally as ./product_api_repo.
+  # Port 5000 is the app's own internal default (see its Dockerfile /
+  # HBN_PRODUCTS_PORT), exposed here on the host as 5001 to match
+  # PRODUCT_API_URL=http://localhost:5001 used outside Docker.
   product_api:
     build:
       context: ./product_api_repo
     container_name: hbntory_product_api
     ports:
-      - "8000:8000"
+      - "5001:5000"
     restart: unless-stopped
 
-  # To be completed by Noham: product_mcp_server and ai_service
-  # product_mcp_server:
-  #   build:
-  #     context: ./product_mcp_server
-  #   container_name: hbntory_mcp_server
-  #   ports:
-  #     - "8100:8100"
-  #   depends_on:
-  #     - product_api
-  #
-  # ai_service:
-  #   build:
-  #     context: ./ai_service
-  #   container_name: hbntory_ai_service
-  #   ports:
-  #     - "8200:8200"
-  #   depends_on:
-  #     - product_mcp_server
-  #     - backoffice
+  mcp_server:
+    build:
+      # Context is project-root/, not product_mcp_server/, so the Dockerfile
+      # can also copy backoffice/app/ into the image (see its own comments).
+      context: ./project-root
+      dockerfile: product_mcp_server/Dockerfile
+    container_name: hbntory_mcp_server
+    ports:
+      - "8000:8000"
+    environment:
+      - PRODUCT_API_URL=http://product_api:5000
+      - DATABASE_URL=sqlite:////data/hbntory.db
+      - MCP_PORT=8000
+    volumes:
+      # Read-only would be more correct (the MCP server never writes stock),
+      # but SQLite's default rollback-journal mode needs write access to the
+      # DB's directory even for SELECTs, so this stays read-write in practice.
+      - backoffice_data:/data
+    depends_on:
+      - product_api
+      - backoffice
+    restart: unless-stopped
+
+  ai_service:
+    build:
+      context: ./project-root/ai_service
+    container_name: hbntory_ai_service
+    ports:
+      - "8100:8100"
+    environment:
+      - MCP_URL=http://mcp_server:8000/mcp
+      - AI_SERVICE_PORT=8100
+    env_file:
+      # Not committed (see project-root/ai_service/.gitignore): each teammate
+      # creates their own from .env.example, with their own GROQ_API_KEY.
+      - ./project-root/ai_service/.env
+    depends_on:
+      - mcp_server
+    restart: unless-stopped
 
 volumes:
   backoffice_data:

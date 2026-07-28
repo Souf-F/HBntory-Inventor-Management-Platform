@@ -91,3 +91,28 @@ def get_product(sku_or_id) -> dict | None:
         return _get(f"/api/v1/products/{sku_or_id}")
     except ProductAPIError:
         return None
+
+
+def get_product_names(skus) -> dict:
+    """
+    Map {sku: name} for the given SKUs, in a single call to the catalog.
+
+    Never raises: if the Product API is down, returns an empty dict so the
+    caller can fall back to displaying raw SKUs. A stock page must stay
+    usable even when an external service is unavailable.
+    """
+    skus = set(skus)
+    if not skus:
+        return {}
+
+    try:
+        products = list_products(limit=1000)
+    except ProductAPIError:
+        current_app.logger.warning("Product API unavailable — falling back to raw SKUs.")
+        return {}
+
+    return {
+        p["sku"]: p.get("name")
+        for p in products
+        if p.get("sku") in skus
+    }
