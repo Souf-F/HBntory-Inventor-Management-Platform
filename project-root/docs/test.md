@@ -1,16 +1,101 @@
-# HBntory — UI/Backend Approach
+# HBntory — Tests and Fixed Vulnerabilities
 
-## 1. Two interfaces, two audiences, no shared state
+Each team member documents here the tests they performed on their part of the project, and the vulnerabilities/bugs identified and fixed. One test = one line. One vulnerability = one line with the corresponding fix.
 
-The project deliberately exposes two separate frontends, served independently, sharing neither session nor rendering logic:
+---
 
-- **`admin/`** — authenticated Backoffice, restricted to employees and the admin
-- **`client_web/`** — public site, no authentication, catalog + AI chat
+## Soufiane Filali — Auth, security, stock operations, Backoffice
 
-This choice avoids a single interface carrying two different authorization logics (authenticated vs anonymous), which would have multiplied conditionals and the risk of showing the wrong button or data to the wrong person.
+### Functional tests
 
-## 2. Frontend stack
+- [x] Login with valid credentials (admin) → session created, `role` and `branch_id` returned
+- [x] Login with valid credentials (common_user) → session created, redirected to stock view
+- [x] Login with incorrect password → 401, generic message
+- [x] Login with disabled account (`is_active = False`) → 401, cannot log in
+- [x] Logout → session invalidated
+- [x] Admin: list users
+- [x] Admin: create a user (common_user, tied to a branch)
+- [x] Admin: change a user's branch
+- [x] Admin: change a user's password
+- [x] Admin: deactivate an account (soft-delete)
+- [x] Admin: reactivate a deactivated account
+- [x] Common user: add stock to their branch
+- [x] Common user: remove stock from their branch
+- [x] Common user: check the stock of one product in their branch
+- [x] Common user: list all stock in their branch
+- [x] Admin: global stock overview across all branches (read-only)
 
-Both frontends are written in vanilla HTML/CSS/JS, with a custom rendering engine (`support.js`, dc-runtime) that interprets an `<x-dc>` template: `{{ }}` bindings, `<sc-if>` conditionals, `<sc-for>` loops, state managed via a `Component extends DCLogic` class with `state`, `setState`, and `renderVals()` recomputing the values exposed to the template on every state change.
+### Security tests
 
-No build framework (React, Vue) on the frontend side: everything runs in a single `index.html` file per interface, loaded directly by the browser. This choice was made to keep local deployment simple as part of the project (no `npm install`, no bundler).
+- [x] SQL injection on the `username`/`password` login fields
+- [x] IDOR: a common user attempts to access another branch's stock by editing the URL (`branch_id`) → 403
+- [x] Mass assignment: attempt to inject `role` or `is_active` into a user-creation request body
+- [x] Type confusion: `quantity` sent as a string or float instead of an int → rejected (400)
+- [x] Session after deactivation: an account disabled while it has an active session loses access on the next request
+- [x] An admin attempts to call a stock route (`POST /branches/<id>/stock`) → 403 (wrong role)
+- [x] A common user attempts to call a users route (`GET /users`) → 403 (wrong role)
+
+### Vulnerabilities found and fixed
+
+- [x] `branch_id` missing from the `/login` response → frontend received `undefined`, breaking routing to the stock view and subsequent stock calls (URL `/branches/undefined/stock`). Fixed in `routes/auth.py`.
+- [x] `PRODUCT_API_URL` pointed to a non-existent Docker URL (`http://external-products-api:5000`) → every product validation failed silently, producing a false "Unknown product_id" message. Fixed in `app/config.py`.
+- [x] `PATCH /users/<id>/reactivate` route missing while the frontend called it → added, protected by `role_required(Role.ADMIN)`.
+- [x] Database still containing old branch names ("Metro Paris Nord") out of sync with the code → caused every branch-name lookup to fail on the AI agent side. Fixed by resetting the database (`rm hbntory.db` + `python -m app.seed`).
+
+---
+
+## Sagal-Louise Haider — DB, SQLAlchemy models, Product API integration, admin interface (Claude Design)
+
+### Functional tests
+
+- []
+- []
+- []
+
+### Security tests
+
+- []
+- []
+
+### Vulnerabilities found and fixed
+
+- []
+- []
+
+---
+
+## Noham Oulma — Product MCP Server, AI Query Service
+
+### Functional tests
+
+- [x] `list_products` — paginated listing from the external product API
+- [x] `get_product_details` — details of a valid product
+- [x] `get_product_details` — invalid identifier → clear error (no crash)
+- [x] `check_stock` — across all branches
+- [x] `check_stock` — restricted to one named branch
+- [x] `check_stock` — nonexistent branch name → clear error, no attempt to guess another name
+- [x] `list_branch_stock` — stock listing for one branch
+- [x] `check_shopping_list` — list satisfiable by at least one branch
+- [x] `check_shopping_list` — list not satisfiable anywhere
+- [x] Public chat: out-of-scope question (not about product, stock, or branch) → polite refusal, no tool called
+- [x] Public chat: question with a quantity → correctly uses `check_shopping_list`, never `check_stock` alone
+
+### Security tests
+
+- [x] Product API down during a call → clear error message, no MCP server crash
+- [x] Automatic retry on transient Groq API error (up to `MAX_API_RETRIES`)
+- [x] Groq rate limit reached → clear user-facing message, no raw technical error leaked
+
+### Vulnerabilities found and fixed
+
+- [x] `check_stock` with `branch_name` consistently failed (`No branch found with name 'HBntory Paris'`) even though the branch name provided was correct → actual cause: local database not resynced with the new branch names (see Soufiane's section). Not a bug in `tools/stock.py`.
+- []
+- [ ]
+
+---
+
+## General notes
+
+- Any checked box ` [x]` should include a brief note if the test revealed unexpected behavior, even a minor one.
+- A "found and fixed" vulnerability entry should always specify: the observed symptom, the actual root cause identified, and the file that was fixed.
+- This file is a living document: update it as you go, not just before a defense/presentation.
