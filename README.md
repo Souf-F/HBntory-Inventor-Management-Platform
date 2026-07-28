@@ -28,14 +28,12 @@ Holberton School Project — Concepteur Développeur d'Applications
 - [System architecture](#system-architecture)
 - [Database schema](#database-schema)
 - [Tech stack](#tech-stack)
+- [Quick start](#quick-start)
 - [Project structure](#project-structure)
 - [Justified technical decisions](#justified-technical-decisions)
-- [Installation and run](#installation-and-run)
-- [Test accounts](#test-accounts)
-- [Example questions for the assistant](#example-questions-for-the-assistant)
-- [File-by-file explanation](#file-by-file-explanation)
 - [Tests performed](#tests-performed)
 - [Known limitations](#known-limitations)
+- [Documentation index](#documentation-index)
 
 ---
 
@@ -48,21 +46,15 @@ HBntory is a stock management system for a fictional retail company with multipl
 
 No product information (name, price, description) is ever stored locally: this data always comes from the external Product API provided by the school.
 
-Full architecture, data boundaries and decision records: [`docs/architecture.md`](project-root/docs/architecture.md).
-
 ---
 
 ## Team and task split
-
-Project built by a team of 3:
 
 | Member | Focus area |
 |---|---|
 | **Sagal-Louise Haider** | Database schema and SQLAlchemy models, sessions and route protection, Product API integration, admin interface |
 | **Noham Oulma** | Product MCP Server, AI Query Service, AI agent |
 | **Soufiane Filali** | Password hashing, role and branch middleware, stock operations, admin user management |
-
-### Detailed split (`backoffice/` folder)
 
 ```mermaid
 flowchart TD
@@ -115,6 +107,8 @@ flowchart TD
 
 **Key point**: the Backoffice and the AI side never communicate directly, they only share the same database. The Backoffice writes stock into it, the MCP Server reads it to answer public questions.
 
+Components, data boundaries and twelve decision records: [`docs/architecture.md`](project-root/docs/architecture.md).
+
 ---
 
 ## Database schema
@@ -147,9 +141,9 @@ erDiagram
     }
 ```
 
-**Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`), never its name, price, or description. That information is always fetched on demand from the Product API.
+**Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`), never its name, price, or description. That information is always fetched on demand from the Product API — there is no products table locally, so the rule cannot be broken by accident.
 
-Full schema documentation, including database-level constraints and where validation lives: [`docs/database.md`](project-root/docs/database.md).
+Constraints, validation rules and seeding: [`docs/database.md`](project-root/docs/database.md).
 
 ---
 
@@ -160,196 +154,35 @@ Full schema documentation, including database-level constraints and where valida
 | Backoffice backend | Flask (REST API) | Lightweight, quick to set up as a team, matches the team's existing skills |
 | ORM | SQLAlchemy | Required by the spec, natively protects against SQL injection |
 | Database | SQLite | No server configuration needed, sufficient for the project's scope |
-| Authentication | Flask-Login (sessions) | Classic internal use case, simpler to implement than JWT tokens in this context |
-| Password hashing | bcrypt | Automatic salting, tunable cost factor, recognized standard for password storage |
-| Public client communication | REST | Each question is handled independently, no conversation history to maintain |
-| AI ↔ Product API bridge | MCP server (FastMCP) | Required by the spec, cleanly separates data access from the agent's logic |
-| LLM provider | Groq | Free to use, OpenAI-compatible message and tool format, which keeps the hand-written tool loop simple |
-| Backoffice interface | Vanilla HTML / CSS / JavaScript | No framework needed for the project's scope |
-| Public client interface | Vanilla HTML / CSS / JavaScript | Simple chat page, no authentication |
+| Authentication | Flask-Login (sessions) | Single browser client, and allows immediate revocation |
+| Password hashing | bcrypt | Automatic salting, tunable cost factor, standard for password storage |
+| Public client communication | REST | Each question is independent, no conversation history to maintain |
+| AI ↔ data bridge | MCP server (FastMCP) | Required by the spec, separates data access from the agent's logic |
+| LLM provider | Groq | Free, OpenAI-compatible tool format, keeps the hand-written tool loop simple |
+| Both frontends | Vanilla HTML / CSS / JavaScript | No framework needed for the project's scope |
 
 ---
 
-## Project structure
+## Quick start
 
-```
-HBntory-Inventor-Management-Platform/
-├── AUTHORS
-├── README.md
-├── requirements.txt
-└── project-root/
-    ├── backoffice/
-    │   ├── app/
-    │   │   ├── __init__.py        # Flask factory, Flask-Login config, CORS
-    │   │   ├── models.py           # SQLAlchemy models (Branch, User, Stock)
-    │   │   ├── config.py            # Configuration (database, secret key, Product API)
-    │   │   ├── seed.py               # Initial data seeding script
-    │   │   └── product_api.py         # Client for the external Product API
-    │   ├── routes/
-    │   │   ├── auth.py               # Login, logout, bcrypt hashing
-    │   │   ├── middleware.py          # Security decorators (role, branch)
-    │   │   ├── stock.py                # Stock operations (common user)
-    │   │   └── users.py                 # Account management (admin)
-    │   ├── requirements.txt
-    │   └── run.py                       # Server entry point
-    ├── product_mcp_server/               # MCP server (Noham)
-    │   ├── server.py                      # Entry point
-    │   ├── mcp_instance.py                 # FastMCP instance
-    │   ├── product_api_client.py            # Calls the external Product API
-    │   ├── db.py                             # Read-only access to the shared database
-    │   ├── tools/
-    │   │   ├── products.py                    # list_products, get_product_details, search_products
-    │   │   └── stock.py                        # check_stock, list_branch_stock, check_shopping_list
-    │   ├── manual_test.py
-    │   ├── requirements.txt
-    │   └── README.md                            # Pointer to docs/product_mcp_server.md
-    ├── ai_service/                               # AI Query Service (Noham)
-    │   ├── app.py                                 # REST endpoint consumed by the client web
-    │   ├── agent.py                                # Agent logic and tool-calling loop
-    │   ├── tests/                                   # pytest suite (unit + live)
-    │   ├── .env.example                              # Template for the Groq API key
-    │   ├── pytest.ini
-    │   ├── requirements.txt
-    │   ├── requirements-dev.txt
-    │   └── README.md                                   # Pointer to docs/ai_service.md
-    ├── hbntory-products-api/                            # External Product API provided by the school
-    │   ├── app.py
-    │   ├── data/products.json
-    │   └── docs/api_contract.md
-    ├── client_web/
-    │   ├── index.html                     # Public interface (dashboard, chat, products, about)
-    │   ├── support.js                      # Rendering runtime
-    │   ├── image-slot.js
-    │   └── assets/                           # Product illustrations and team photos
-    ├── admin/
-    │   ├── index.html                      # Backoffice interface (login, stock, users)
-    │   └── support.js                       # Rendering runtime
-    └── docs/
-        ├── architecture.md                   # Components, data boundaries, decision records, MVP
-        ├── authentication.md                  # Authentication and authorization strategy
-        ├── database.md                         # Schema, models, seeding, validation rules
-        ├── ui-backend-approach.md               # REST vs SSR decision, frontend stack, CORS
-        ├── tests.md                              # Tests and fixed vulnerabilities, per member
-        ├── product_mcp_server.md                  # Full MCP server documentation
-        └── ai_service.md                           # Full AI Query Service documentation
-```
+The system runs as **five services, each in its own terminal**. Full step-by-step
+instructions, including virtual environment setup, the Groq API key and a troubleshooting
+section: **[`docs/quick-start-guide.md`](project-root/docs/quick-start-guide.md)**.
 
----
+| # | Service | Port |
+|---|---|---|
+| 1 | Product API | 5001 |
+| 2 | MCP Server | 8000 |
+| 3 | AI Query Service | 8100 |
+| 4 | Backoffice | 5000 |
+| 5 | Static frontends | 5502 |
 
-## Justified technical decisions
+Then open:
 
-Nine decision records, with benefits and trade-offs for each, are documented in
-[`docs/architecture.md`](project-root/docs/architecture.md). The main ones:
+- **Backoffice** (login required): http://127.0.0.1:5502/admin/
+- **Public site** (no login): http://127.0.0.1:5502/client_web/
 
-### 1. Session-based authentication, not token-based
-
-The Backoffice is a classic internal use case consumed by a single type of client (the browser). Flask-Login sessions avoid having to manually handle issuing, expiring, and verifying JWT tokens, saving meaningful time on a two-week project. Sessions also allow immediate revocation, which a JWT does not without additional infrastructure.
-
-### 2. bcrypt for password hashing
-
-- **How it works**: `bcrypt.hashpw()` generates a random salt on every hash and embeds it in the final result. `bcrypt.checkpw()` extracts that salt automatically to verify the supplied password.
-- **Why not plain SHA256**: SHA256 is a general-purpose hash designed to be fast, which makes it vulnerable to large-scale brute-force attacks. bcrypt includes automatic salting (defeats rainbow tables) and a tunable cost factor that deliberately slows down every computation, making brute-force impractical.
-
-### 3. Authorization enforced exclusively on the backend
-
-Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface, a common user manually tampering with an HTTP request would still be blocked by the server. Account status is also re-checked on **every** request through Flask-Login's `user_loader`, so deactivating an account ends its session immediately rather than at next login.
-
-### 4. REST rather than WebSocket for the public client
-
-Each question sent to the chat is independent (no conversation history required by the spec), so a persistent connection brings no real benefit over the simplicity of a plain REST request.
-
-### 5. REST API and browser rendering, rather than server-side rendering
-
-The Backoffice exposes JSON only; rendering happens in the browser. This keeps every authorization rule on the routes instead of splitting it between routes and templates. Trade-off: an extra round-trip per view, and loading and error states handled by hand. Detailed in [`docs/ui-backend-approach.md`](project-root/docs/ui-backend-approach.md).
-
-### 6. Two independent services sharing one database
-
-The Backoffice and the AI Service never call each other. They share a single schema, which avoids duplicating the data model across two databases. The trade-off is discipline: the Backoffice writes, the MCP server only reads.
-
-### 7. Stock tools built into our own MCP server
-
-Rather than a third-party database MCP toolbox, which would give the agent flexible SQL-like access that is harder to keep read-only and scoped. A small set of hand-written, single-purpose tools keeps the boundary clear and every tool call observable.
-
-### 8. Soft-delete rather than physical deletion
-
-A deactivated user (`is_active = False`) can no longer log in, but their past stock movements remain intact in the database, matching the spec's requirement.
-
-### 9. Product data resolved on demand, never stored
-
-Product names shown in the Backoffice are fetched from the Product API at display time, in a single call per page, and never persisted. If the API is unavailable, the stock page degrades to raw SKUs and stays usable. Write operations behave the opposite way: adding stock requires validating the SKU against the catalog, so an unreachable API returns a 503 rather than inserting an unverified identifier.
-
-### 10. No containerization
-
-Docker was evaluated and dropped. The five services run as plain Python processes, which keeps the setup transparent and avoids build failures during a live demo. The trade-off is a longer manual startup, documented below.
-
----
-
-## Installation and run
-
-The system runs as **five separate processes**, each in its own terminal. All five must be
-running for the full flow (Backoffice + AI assistant) to work.
-
-### 1. Install dependencies
-
-```bash
-cd project-root/backoffice        && pip install -r requirements.txt
-cd ../product_mcp_server          && pip install -r requirements.txt
-cd ../ai_service                  && pip install -r requirements.txt
-```
-
-Add `--break-system-packages` on systems with an externally managed Python environment, or
-create a virtual environment first.
-
-### 2. Configure the AI Service
-
-The agent needs a Groq API key. Copy the template and fill it in:
-
-```bash
-cd project-root/ai_service
-cp .env.example .env
-# then edit .env and set your Groq API key
-```
-
-Without this file the AI Query Service will not start, and the public client will return an
-error instead of an answer. The Backoffice works independently of it.
-
-### 3. Initialize the database
-
-```bash
-cd project-root/backoffice
-python3 -m app.seed
-```
-
-`seed.py` uses relative imports and must be executed as a module, from `backoffice/` and
-never from `app/`. It is idempotent: it skips seeding if the database already contains data.
-To reset the data set, delete `hbntory.db` first and run it again.
-
-### 4. Start the services
-
-| # | Service | Command | Port |
-|---|---|---|---|
-| 1 | Product API | `cd project-root/hbntory-products-api && HBN_PRODUCTS_PORT=5001 python3 app.py` | 5001 |
-| 2 | Backoffice | `cd project-root/backoffice && python3 run.py` | 5000 |
-| 3 | MCP Server | `cd project-root/product_mcp_server && python3 server.py` | 8000 |
-| 4 | AI Query Service | `cd project-root/ai_service && python3 app.py` | 8100 |
-| 5 | Static frontends | `cd project-root && python3 -m http.server 5502` | 5502 |
-
-### 5. Open the interfaces
-
-- **Backoffice**: http://127.0.0.1:5502/admin/
-- **Public client**: http://127.0.0.1:5502/client_web/
-
-> **Port note.** The Product API defaults to port 5000, which collides with the Backoffice.
-> Set `HBN_PRODUCTS_PORT=5001` so it matches `PRODUCT_API_URL` in `app/config.py`.
-
-> **CORS note.** The frontends are served as static files on a different port from the API,
-> so every request is cross-origin. The port used must appear in the allowed origins
-> configured in `app/__init__.py`, otherwise login fails with an error visible only in the
-> browser console.
-
----
-
-## Test accounts
+### Test accounts
 
 | Username | Password | Role | Branch |
 |---|---|---|---|
@@ -363,87 +196,97 @@ different quantities, some are exclusive to a single branch, and several catalog
 are stocked nowhere — so the assistant has to answer "unavailable" rather than invent a
 branch.
 
----
+### Example questions for the assistant
 
-## Example questions for the assistant
-
-- *"Where can I find the 24 inch Compact Monitor?"*
-- *"What products are available at HBntory Paris?"*
-- *"I need 3 units of 8-Port Managed Switch and 2 of Barcode Scanner USB, which branch(es) can supply all of it?"*
-- *"Give me the details of product HB-MON-2102"*
+- *"Where can I find HB-LAP-1001?"*
+- *"What products are available in HBntory Lyon?"*
+- *"I need 3 units of HB-LAP-1001, 2 of HB-MON-2101 and 4 of HB-KBD-4101, which branch can I visit?"*
+- *"Give me the details for HB-MON-2102"*
+- *"Tell me about HB-ZZZ-9999"* — unknown product: the assistant states the information is unavailable rather than inventing it
 
 The agent answers in the language the question was asked in, French or English.
 
 ---
 
-## File-by-file explanation
+## Project structure
 
-### Backoffice — `app/`
+```
+HBntory-Inventor-Management-Platform/
+├── AUTHORS
+├── README.md
+├── requirements.txt
+└── project-root/
+    ├── backoffice/
+    │   ├── app/
+    │   │   ├── __init__.py         # Flask factory, Flask-Login config, CORS
+    │   │   ├── models.py            # SQLAlchemy models (Branch, User, Stock)
+    │   │   ├── config.py             # Database, secret key, Product API URL
+    │   │   ├── seed.py                # Initial data seeding script
+    │   │   └── product_api.py          # Client for the external Product API
+    │   ├── routes/
+    │   │   ├── auth.py                # Login, logout, bcrypt hashing
+    │   │   ├── middleware.py           # Security decorators (role, branch)
+    │   │   ├── stock.py                 # Stock operations (common user)
+    │   │   └── users.py                  # Account management (admin)
+    │   ├── requirements.txt
+    │   └── run.py                        # Server entry point
+    ├── product_mcp_server/                # MCP server (Noham)
+    │   ├── server.py                       # Entry point
+    │   ├── mcp_instance.py                  # FastMCP instance
+    │   ├── product_api_client.py             # Calls the external Product API
+    │   ├── db.py                              # Read-only access to the shared database
+    │   └── tools/
+    │       ├── products.py                     # list_products, search_products, get_product_details
+    │       └── stock.py                         # check_stock, list_branch_stock, check_shopping_list
+    ├── ai_service/                               # AI Query Service (Noham)
+    │   ├── app.py                                 # REST endpoint for the client web
+    │   ├── agent.py                                # Agent logic and tool-calling loop
+    │   ├── tests/                                   # pytest suite (unit + live)
+    │   └── .env.example                              # Template for the Groq API key
+    ├── hbntory-products-api/                          # External Product API (provided)
+    ├── client_web/
+    │   ├── index.html                     # Dashboard, chat, catalog, about
+    │   ├── support.js                      # Rendering runtime
+    │   └── assets/                          # Product illustrations and team photos
+    ├── admin/
+    │   ├── index.html                      # Login, stock management, account management
+    │   └── support.js                       # Rendering runtime
+    └── docs/                                 # See documentation index below
+```
 
-| File | Role in one sentence |
-|---|---|
-| `models.py` | Defines the 3 tables (Branch, User, Stock) and the business rules enforced at the database level |
-| `config.py` | Centralizes configuration (database path, secret key, Product API URL) |
-| `seed.py` | Creates the admin, branches, and test stock on first run |
-| `product_api.py` | HTTP client for the external Product API, with clean error handling (unavailability, product not found) |
-| `__init__.py` | Assembles the Flask application: connects the database, configures Flask-Login and CORS, registers the routes |
+---
 
-### Backoffice — `routes/`
+## Justified technical decisions
 
-| File | Role in one sentence |
-|---|---|
-| `auth.py` | Login, logout, and the bcrypt hashing/verification functions |
-| `middleware.py` | Two reusable security decorators: role check and branch check |
-| `stock.py` | Add, remove, check, and list stock, restricted to the logged-in common user's branch |
-| `users.py` | List, create, update, and deactivate accounts, restricted to the admin |
+Twelve decision records with benefits and trade-offs are documented in
+[`docs/architecture.md`](project-root/docs/architecture.md). The four that shaped the system
+most:
 
-### `product_mcp_server/`
+**Sessions rather than JWT.** The Backoffice has a single type of client, the browser, so a
+token brings no benefit. Sessions allow immediate revocation: because the server holds the
+state and reloads the user on every request, deactivating an account ends its session at
+once. A JWT stays valid until it expires unless a denylist is maintained server-side.
 
-| File | Role in one sentence |
-|---|---|
-| `server.py` | Entry point that starts the MCP server and registers the tools |
-| `mcp_instance.py` | Shared FastMCP instance |
-| `product_api_client.py` | Calls the external Product API on behalf of the tools |
-| `db.py` | Read-only access to the shared database, reusing the Backoffice models |
-| `tools/products.py` | `list_products`, `get_product_details`, `search_products` |
-| `tools/stock.py` | `check_stock`, `list_branch_stock`, `check_shopping_list` |
+**bcrypt for password hashing.** A random salt is generated per password and embedded in the
+hash itself, and the cost factor is deliberately slow. A general-purpose hash like SHA256 is
+designed to be fast, which is exactly the wrong property for password storage.
 
-### `ai_service/`
+**Authorization enforced on the backend only.** Two decorators, `role_required` and
+`branch_required`, protect every sensitive route. The branch always comes from the session,
+never from the request. The interface hides forbidden actions for readability, never for
+security — a hand-crafted request is still rejected with a 403.
 
-| File | Role in one sentence |
-|---|---|
-| `app.py` | REST endpoint that receives a question from the client web and returns an answer |
-| `agent.py` | Agent logic: system prompt, hand-written tool-calling loop, grounding rules |
-| `tests/` | pytest suite covering the agent and the endpoint, unit and live |
-
-### `client_web/`
-
-| File | Role in one sentence |
-|---|---|
-| `index.html` | Public interface: dashboard, AI assistant, product catalog, about page |
-| `support.js` | Rendering runtime for the page templating |
-| `assets/` | Product illustrations and team photos, static files only — no product data is stored in the database |
-
-### `admin/`
-
-| File | Role in one sentence |
-|---|---|
-| `index.html` | Backoffice interface: login screen, stock management, account management |
-| `support.js` | Rendering runtime for the page templating |
-
-### Other
-
-| File | Role in one sentence |
-|---|---|
-| `run.py` | Entry point that starts the Flask server |
-| `AUTHORS` | Contributors to the project |
+**Product data resolved on demand, never stored.** Names are fetched from the Product API at
+display time, in a single call per page. Reads and writes behave differently on purpose: if
+the catalog is unavailable, the stock page degrades to raw SKUs and stays usable, while
+adding stock returns a 503 rather than inserting a SKU that could not be verified.
 
 ---
 
 ## Tests performed
 
-Every test is documented per team member, along with the vulnerabilities found and the file
-fixed for each, in [`docs/tests.md`](project-root/docs/tests.md).
+Every test is documented per team member, with the vulnerabilities found and the file fixed
+for each, in [`docs/tests.md`](project-root/docs/tests.md).
 
 | Area | Coverage | Method |
 |---|---|---|
@@ -458,26 +301,30 @@ Three scenarios are demonstrated live during the presentation:
 2. **Immediate session invalidation** — an account deactivated while its session is active loses access on its next request, not at next login.
 3. **Graceful degradation** — with the Product API stopped, the stock page still loads and falls back to raw SKUs.
 
-One point of attention is carried forward to Task 6 (Client Web Interface): data displayed on the client side should be escaped using `textContent` rather than `innerHTML`, to avoid any risk of stored XSS originating from data entered through the Backoffice.
-
 ---
 
 ## Known limitations
 
-- **Uneven automated test coverage.** The AI Service has a pytest suite; the Backoffice is verified manually through documented `curl` commands. A pytest suite covering the authorization decorators would be the first addition, since those rules are the most security-sensitive part of the codebase and the most costly to re-verify by hand.
-- **No containerization.** Docker was dropped in favour of a documented manual startup, so reproducing the environment relies on following the instructions above rather than on a single command.
-- **XSS escaping on the client side** is an open action item on the Client Web Interface, as noted above.
-- **`GET /branches` is admin-only.** Common users would need it to display their own branch name; the admin interface currently works around this with a hardcoded list.
+- **Uneven automated test coverage.** The AI Service has a pytest suite; the Backoffice is verified manually through documented `curl` commands. A pytest suite covering the authorization decorators would be the first addition, since those rules are the most security-sensitive part of the codebase.
+- **XSS escaping on the client side.** Values entered through the Backoffice are stored as raw text by the API, which is expected at that layer; the Client Web Interface must render them with `textContent` rather than `innerHTML`.
+- **No containerization.** Docker was dropped in favour of a documented manual startup, so reproducing the environment relies on following the guide rather than on a single command.
+- **`GET /branches` is admin-only.** Common users would need it to display their own branch name; the admin interface works around this with a hardcoded list.
 - **The MCP server is coupled to the Backoffice schema.** It imports the SQLAlchemy models directly, so a model change on the Backoffice side can break the stock tools.
-- **`db.create_all()` does not migrate.** It creates missing tables but never alters existing ones, so a database created before a constraint was added will not gain it. During development the fix is to delete the file and re-seed; Alembic would be the production answer.
-- **SQLite serializes writes.** Sufficient for the project's scope. `SQLALCHEMY_DATABASE_URI` is environment-overridable, so moving to PostgreSQL requires no code change.
+- **`db.create_all()` does not migrate.** It creates missing tables but never alters existing ones, so a database created before a constraint was added will not gain it. Alembic would be the production answer.
+- **SQLite serializes writes.** Sufficient for this scope. `SQLALCHEMY_DATABASE_URI` is environment-overridable, so moving to PostgreSQL requires no code change.
 - **No SSL/TLS**, explicitly out of scope per the project brief.
-- **AI assistant reliability depends on the Groq free tier.** Under heavy testing, the AI Query Service occasionally returns a generic "technical problem" or "rate limit reached" error even for a well-formed question, since the underlying model or API quota is temporarily unavailable. Retrying the same question shortly after typically succeeds.
 
 ---
 
-## Authors
+## Documentation index
 
-- **Soufiane Filali** — [github.com/Souf-F](https://github.com/Souf-F)
-- **Sagal-Louise Haider** — [github.com/sagalou](https://github.com/sagalou)
-- **Noham Oulma** — [github.com/nohamoulma-hub](https://github.com/nohamoulma-hub)
+| Document | Contents |
+|---|---|
+| [`docs/quick-start-guide.md`](project-root/docs/quick-start-guide.md) | Step-by-step installation and startup, with troubleshooting |
+| [`docs/architecture.md`](project-root/docs/architecture.md) | Components, data boundaries, twelve decision records, MVP |
+| [`docs/database.md`](project-root/docs/database.md) | Schema, constraints, seeding, validation rules |
+| [`docs/authentication.md`](project-root/docs/authentication.md) | Authentication and authorization strategy |
+| [`docs/ui-backend-approach.md`](project-root/docs/ui-backend-approach.md) | REST vs SSR decision, frontend stack, CORS |
+| [`docs/product_mcp_server.md`](project-root/docs/product_mcp_server.md) | MCP server tools and error handling |
+| [`docs/ai_service.md`](project-root/docs/ai_service.md) | AI Query Service, agent, supported question types |
+| [`docs/tests.md`](project-root/docs/tests.md) | Tests and fixed vulnerabilities, per member |
