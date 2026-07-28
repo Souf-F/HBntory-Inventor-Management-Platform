@@ -166,33 +166,47 @@ erDiagram
 ## Project structure
 
 ```
-project-root/
-├── backoffice/
-│   ├── app/
-│   │   ├── __init__.py        # Flask factory, Flask-Login config
-│   │   ├── models.py           # SQLAlchemy models (Branch, User, Stock)
-│   │   ├── config.py            # Configuration (database, secret key, Product API)
-│   │   ├── seed.py               # Initial data seeding script
-│   │   └── product_api.py         # Client for the external Product API
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── auth.py               # Login, logout, bcrypt hashing
-│   │   ├── middleware.py          # Security decorators (role, branch)
-│   │   ├── stock.py                # Stock operations (common user)
-│   │   └── users.py                 # Account management (admin)
-│   ├── requirements.txt
-│   └── run.py                       # Server entry point
-├── product_mcp_server/               # MCP server (Noham)
-├── ai_service/                        # AI Query Service (Noham)
-├── client_web/
-│   └── index.html                     # Public interface (dashboard, chat, products, about)
-├── admin/
-│   ├── HBntory Admin.dc.html           # Backoffice interface (login, stock, users)
-│   └── support.js                       # Runtime required to render the admin page
-├── docs/                                # Documentation, diagrams
-├── docker-compose.yml
-├── Dockerfile.backoffice
-└── README.md
+HBntory-Inventor-Management-Platform/
+├── docker-compose.yml                    # Orchestrates all 4 services together
+├── .dockerignore                          # Applies to the mcp_server build (context: project-root/)
+├── README.md
+└── project-root/
+    ├── backoffice/
+    │   ├── app/
+    │   │   ├── __init__.py        # Flask factory, Flask-Login config
+    │   │   ├── models.py           # SQLAlchemy models (Branch, User, Stock)
+    │   │   ├── config.py            # Configuration (database, secret key, Product API)
+    │   │   ├── seed.py               # Initial data seeding script
+    │   │   └── product_api.py         # Client for the external Product API
+    │   ├── routes/
+    │   │   ├── __init__.py
+    │   │   ├── auth.py               # Login, logout, bcrypt hashing
+    │   │   ├── middleware.py          # Security decorators (role, branch)
+    │   │   ├── stock.py                # Stock operations (common user)
+    │   │   └── users.py                 # Account management (admin)
+    │   ├── requirements.txt
+    │   ├── Dockerfile                   # Backoffice image
+    │   ├── .dockerignore
+    │   └── run.py                       # Server entry point
+    ├── product_mcp_server/               # MCP server (Noham)
+    │   ├── Dockerfile                     # Build context is project-root/, also copies backoffice/app/
+    │   ├── .dockerignore
+    │   └── README.md                      # Pointer to docs/product_mcp_server.md
+    ├── ai_service/                        # AI Query Service (Noham)
+    │   ├── Dockerfile
+    │   ├── .dockerignore
+    │   └── README.md                      # Pointer to docs/ai_service.md
+    ├── client_web/
+    │   └── index.html                     # Public interface (dashboard, chat, products, about)
+    ├── admin/
+    │   ├── HBntory Admin.dc.html           # Backoffice interface (login, stock, users)
+    │   └── support.js                       # Runtime required to render the admin page
+    └── docs/                                # Documentation, diagrams
+        ├── architecture.md
+        ├── authentication.md
+        ├── ui-backend-approach.md
+        ├── product_mcp_server.md            # Full MCP server documentation
+        └── ai_service.md                     # Full AI Query Service documentation
 ```
 
 ---
@@ -297,8 +311,10 @@ The public client (`client_web/index.html`) and the admin interface (`admin/HBnt
 | File | Role in one sentence |
 |---|---|
 | `run.py` | Entry point that starts the Flask server |
-| `docker-compose.yml` | Orchestration of the different services (Backoffice, Product API, MCP, AI Service) |
-| `Dockerfile.backoffice` | Build instructions for the Backoffice image |
+| `docker-compose.yml` (repo root) | Orchestration of the 4 services (Backoffice, Product API, MCP server, AI Service), and the shared SQLite volume between Backoffice and the MCP server |
+| `backoffice/Dockerfile` | Build instructions for the Backoffice image |
+| `product_mcp_server/Dockerfile` | Build instructions for the MCP server image (context is `project-root/`, since it also copies `backoffice/app/` in, so `db.py` can import Branch/Stock) |
+| `ai_service/Dockerfile` | Build instructions for the AI Query Service image |
 
 ---
 
@@ -322,4 +338,4 @@ One point of attention was identified for Task 6 (Client Web Interface): data di
 8. `get_product()` against the real Product API
 9. `list_products()` against the real Product API
 
-**AI Service / MCP Server tests (Noham)**: ~50 manual and automated checks run across the MCP tools and the AI agent's grounding behavior, still in progress, exact breakdown to be documented in `product_mcp_server/README.md` / `ai_service/README.md`.
+**AI Service / MCP Server tests (Noham)**: ~50 manual and automated checks run across the MCP tools and the AI agent's grounding behavior, still in progress, exact breakdown documented in [`docs/product_mcp_server.md`](project-root/docs/product_mcp_server.md) / [`docs/ai_service.md`](project-root/docs/ai_service.md).
