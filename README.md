@@ -34,6 +34,7 @@ Holberton School Project — Concepteur Développeur d'Applications
 - [Example questions for the assistant](#example-questions-for-the-assistant)
 - [File-by-file explanation](#file-by-file-explanation)
 - [Tests performed](#tests-performed)
+- [Known limitations](#known-limitations)
 
 ---
 
@@ -54,9 +55,9 @@ Project built by a team of 3:
 
 | Member | Focus area |
 |---|---|
-| **Sagal-Louise Haider** | Database, SQLAlchemy models, Product API integration |
+| **Sagal-Louise Haider** | Database schema and SQLAlchemy models, sessions and route protection, Product API integration, admin interface |
 | **Noham Oulma** | Product MCP Server, AI Query Service, AI agent |
-| **Soufiane Filali** | Authentication, security, stock operations and admin management in the Backoffice |
+| **Soufiane Filali** | Password hashing, role and branch middleware, stock operations, admin user management |
 
 ### Detailed split (`backoffice/` folder)
 
@@ -145,6 +146,8 @@ erDiagram
 
 **Golden rule**: the `STOCK` table only stores the external product identifier (`product_id`), never its name, price, or description. That information is always fetched on demand from the Product API.
 
+Full schema documentation, including database-level constraints and where validation lives: [`docs/database.md`](project-root/docs/database.md).
+
 ---
 
 ## Tech stack
@@ -173,7 +176,7 @@ HBntory-Inventor-Management-Platform/
 └── project-root/
     ├── backoffice/
     │   ├── app/
-    │   │   ├── __init__.py        # Flask factory, Flask-Login config
+    │   │   ├── __init__.py        # Flask factory, Flask-Login config, CORS
     │   │   ├── models.py           # SQLAlchemy models (Branch, User, Stock)
     │   │   ├── config.py            # Configuration (database, secret key, Product API)
     │   │   ├── seed.py               # Initial data seeding script
@@ -196,17 +199,23 @@ HBntory-Inventor-Management-Platform/
     │   ├── Dockerfile
     │   ├── .dockerignore
     │   └── README.md                      # Pointer to docs/ai_service.md
+    ├── hbntory-products-api/               # External Product API provided by the school
+    │   ├── data/products.json
+    │   ├── docs/api_contract.md
+    │   └── app.py
     ├── client_web/
     │   └── index.html                     # Public interface (dashboard, chat, products, about)
     ├── admin/
-    │   ├── HBntory Admin.dc.html           # Backoffice interface (login, stock, users)
+    │   ├── index.html                      # Backoffice interface (login, stock, users)
     │   └── support.js                       # Runtime required to render the admin page
-    └── docs/                                # Documentation, diagrams
-        ├── architecture.md
-        ├── authentication.md
-        ├── ui-backend-approach.md
-        ├── product_mcp_server.md            # Full MCP server documentation
-        └── ai_service.md                     # Full AI Query Service documentation
+    └── docs/
+        ├── architecture.md                   # Components, data boundaries, decision records, MVP
+        ├── authentication.md                  # Authentication and authorization strategy
+        ├── database.md                         # Schema, models, seeding, validation rules
+        ├── ui-backend-approach.md               # REST vs SSR decision, frontend stack, CORS
+        ├── test.md                               # Tests and fixed vulnerabilities, per member
+        ├── product_mcp_server.md                  # Full MCP server documentation
+        └── ai_service.md                           # Full AI Query Service documentation
 ```
 
 ---
@@ -215,7 +224,7 @@ HBntory-Inventor-Management-Platform/
 
 ### 1. Session-based authentication, not token-based
 
-The Backoffice is a classic internal use case consumed by a single type of client (the browser). Flask-Login sessions avoid having to manually handle issuing, expiring, and verifying JWT tokens, saving meaningful time on a two-week project.
+The Backoffice is a classic internal use case consumed by a single type of client (the browser). Flask-Login sessions avoid having to manually handle issuing, expiring, and verifying JWT tokens, saving meaningful time on a two-week project. Sessions also allow immediate revocation, which a JWT does not without additional infrastructure.
 
 ### 2. bcrypt for password hashing
 
@@ -224,31 +233,72 @@ The Backoffice is a classic internal use case consumed by a single type of clien
 
 ### 3. Authorization enforced exclusively on the backend
 
-Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface, a common user manually tampering with an HTTP request would still be blocked by the server.
+Two reusable decorators (`role_required`, `branch_required`) protect every sensitive route. No permission check relies on the interface, a common user manually tampering with an HTTP request would still be blocked by the server. Account status is also re-checked on **every** request through Flask-Login's `user_loader`, so deactivating an account ends its session immediately rather than at next login.
 
 ### 4. REST rather than WebSocket for the public client
 
 Each question sent to the chat is independent (no conversation history required by the spec), so a persistent connection brings no real benefit over the simplicity of a plain REST request.
 
-### 5. Soft-delete rather than physical deletion
+### 5. REST API and browser rendering, rather than server-side rendering
+
+The Backoffice exposes JSON only; rendering happens in the browser. This keeps every authorization rule on the routes instead of splitting it between routes and templates. Trade-off: an extra round-trip per view, and loading and error states handled by hand. Detailed in [`docs/ui-backend-approach.md`](project-root/docs/ui-backend-approach.md).
+
+### 6. Soft-delete rather than physical deletion
 
 A deactivated user (`is_active = False`) can no longer log in, but their past stock movements remain intact in the database, matching the spec's requirement.
+
+### 7. Product data resolved on demand, never stored
+
+Product names shown in the Backoffice are fetched from the Product API at display time, in a single call per page, and never persisted. If the API is unavailable, the stock page degrades to raw SKUs and stays usable. Write operations behave the opposite way: adding stock requires validating the SKU against the catalog, so an unreachable API returns a 503 rather than inserting an unverified identifier.
 
 ---
 
 ## Installation and run
 
+### Option A — Docker
+
 ```bash
-# Backoffice
-cd backoffice
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python -m app.seed        # initializes the database (admin + branches + test stock)
-python run.py               # starts the server at http://127.0.0.1:5000
+docker compose up --build
 ```
 
-The public client (`client_web/index.html`) and the admin interface (`admin/HBntory Admin.dc.html`) are served separately via a static server (for example Live Server in VS Code).
+Starts the four containerized services (Backoffice, Product API, MCP server, AI Service),
+with the shared SQLite volume between the Backoffice and the MCP server.
+
+### Option B — manual, one terminal per service
+
+Install dependencies and initialize the database once:
+
+```bash
+cd project-root/backoffice
+pip install -r requirements.txt          # add --break-system-packages if needed
+python3 -m app.seed                       # run from backoffice/, never from app/
+```
+
+`seed.py` uses relative imports and must be executed as a module. It is idempotent: it
+skips seeding if the database already contains data.
+
+Then start each service in its own terminal:
+
+| # | Service | Command | Port |
+|---|---|---|---|
+| 1 | Product API | `cd project-root/hbntory-products-api && HBN_PRODUCTS_PORT=5001 python3 app.py` | 5001 |
+| 2 | Backoffice | `cd project-root/backoffice && python3 run.py` | 5000 |
+| 3 | MCP Server | `cd project-root/product_mcp_server && python3 server.py` | 8000 |
+| 4 | AI Query Service | `cd project-root/ai_service && python3 app.py` | 8100 |
+| 5 | Static frontends | `cd project-root && python3 -m http.server 5502` | 5502 |
+
+Then open:
+
+- **Backoffice**: http://127.0.0.1:5502/admin/
+- **Public client**: http://127.0.0.1:5502/client_web/
+
+> **Port note.** The Product API defaults to port 5000, which collides with the Backoffice.
+> Set `HBN_PRODUCTS_PORT=5001` so it matches `PRODUCT_API_URL` in `app/config.py`.
+
+> **CORS note.** The frontends are served as static files on a different port from the API,
+> so every request is cross-origin. The port used must appear in the allowed origins
+> configured in `app/__init__.py`, otherwise login fails with an error visible only in the
+> browser console.
 
 ---
 
@@ -269,6 +319,7 @@ The public client (`client_web/index.html`) and the admin interface (`admin/HBnt
 - *"What products are available in branch Y?"*
 - *"I need 3 units of X, 2 of Y and 4 of Z, which branch(es) can I visit?"*
 - *"Give me the details for product XX"*
+- *"Tell me about product HB-ZZZ-9999"* — unknown product: the assistant states the information is unavailable rather than inventing it
 
 ---
 
@@ -282,7 +333,7 @@ The public client (`client_web/index.html`) and the admin interface (`admin/HBnt
 | `config.py` | Centralizes configuration (database path, secret key, Product API URL) |
 | `seed.py` | Creates the admin, branches, and test stock on first run |
 | `product_api.py` | HTTP client for the external Product API, with clean error handling (unavailability, product not found) |
-| `__init__.py` | Assembles the Flask application: connects the database, configures Flask-Login, registers the routes |
+| `__init__.py` | Assembles the Flask application: connects the database, configures Flask-Login and CORS, registers the routes |
 
 ### Backoffice — `routes/`
 
@@ -303,7 +354,7 @@ The public client (`client_web/index.html`) and the admin interface (`admin/HBnt
 
 | File | Role in one sentence |
 |---|---|
-| `HBntory Admin.dc.html` | Backoffice interface: login screen, stock management, account management |
+| `index.html` | Backoffice interface: login screen, stock management, account management |
 | `support.js` | Runtime required to render the templating used by the admin page |
 
 ### Other
@@ -320,22 +371,30 @@ The public client (`client_web/index.html`) and the admin interface (`admin/HBnt
 
 ## Tests performed
 
-**13 functional tests** covering authentication, roles, stock operations, and account management, all passed.
+Every test is documented per team member, along with the vulnerabilities found and the file
+fixed for each, in [`docs/test.md`](project-root/docs/test.md).
 
-**7 security tests** covering SQL injection, role bypass via a stale session, mass assignment, type confusion, and unauthorized resource access — all passed, no exploitable flaw identified on the Backoffice side.
+| Area | Coverage |
+|---|---|
+| Auth, roles, stock operations, admin management | Functional and security tests on the Backoffice |
+| Database, Product API integration, admin interface | Integration tests against the live backend and the real Product API |
+| MCP tools and AI agent grounding | Tool-level tests, error handling, out-of-scope question handling |
 
-One point of attention was identified for Task 6 (Client Web Interface): data displayed on the client side should be escaped using `textContent` rather than `innerHTML`, to avoid any risk of stored XSS originating from data entered through the Backoffice.
+Three scenarios are demonstrated live during the presentation:
 
-**Manual integration tests (Sagal)**: 9 verifications run against the live backend and the external Product API, all passed.
+1. **Branch isolation** — a common user's hand-crafted request against another branch is rejected with a 403 by the route, bypassing the interface entirely.
+2. **Immediate session invalidation** — an account deactivated while its session is active loses access on its next request, not at next login.
+3. **Graceful degradation** — with the Product API stopped, the stock page still loads and falls back to raw SKUs.
 
-1. Login with correct credentials
-2. Login rejected with incorrect password
-3. `GET /branches` returns the correct branch names
-4. `DELETE /users/<id>` deactivates an account
-5. `PATCH /users/<id>/reactivate` reactivates it
-6. `PATCH /users/<id>` updates and persists a username change
-7. `health_check()` against the real Product API
-8. `get_product()` against the real Product API
-9. `list_products()` against the real Product API
+One point of attention is carried forward to Task 6 (Client Web Interface): data displayed on the client side should be escaped using `textContent` rather than `innerHTML`, to avoid any risk of stored XSS originating from data entered through the Backoffice.
 
-**AI Service / MCP Server tests (Noham)**: ~50 manual and automated checks run across the MCP tools and the AI agent's grounding behavior, still in progress, exact breakdown documented in [`docs/product_mcp_server.md`](project-root/docs/product_mcp_server.md) / [`docs/ai_service.md`](project-root/docs/ai_service.md).
+---
+
+## Known limitations
+
+- **No automated test suite.** All tests are manual and reproducible from the commands documented in `docs/test.md`, but they do not run on each commit. A pytest suite covering the authorization decorators would be the first addition, since those rules are the most security-sensitive part of the codebase and the most costly to re-verify by hand.
+- **XSS escaping on the client side** is an open action item on the Client Web Interface, as noted above.
+- **`GET /branches` is admin-only.** Common users would need it to display their own branch name; the admin interface currently works around this with a hardcoded list.
+- **`db.create_all()` does not migrate.** It creates missing tables but never alters existing ones, so a database created before a constraint was added will not gain it. During development the fix is to delete the file and re-seed; Alembic would be the production answer.
+- **SQLite serializes writes.** Sufficient for the project's scope. `SQLALCHEMY_DATABASE_URI` is environment-overridable, so moving to PostgreSQL requires no code change.
+- **No SSL/TLS**, explicitly out of scope per the project brief.

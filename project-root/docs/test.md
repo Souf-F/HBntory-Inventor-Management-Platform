@@ -48,19 +48,47 @@ Each team member documents here the tests they performed on their part of the pr
 
 ### Functional tests
 
-- []
-- []
-- []
+- [x] Login with valid credentials (admin and common_user) → session created
+- [x] Login with an incorrect password → 401, generic message
+- [x] `GET /branches` → correct branch names returned
+- [x] `DELETE /users/<id>` → account deactivated, row and stock history kept
+- [x] `PATCH /users/<id>/reactivate` → account reactivated, login works again
+- [x] `PATCH /users/<id>` with a new username → change persisted (was silently ignored before, see below)
+- [x] `health_check()` against the real Product API → reachable
+- [x] `get_product()` against the real Product API → product returned by SKU
+- [x] `list_products()` against the real Product API → full catalog returned (39 products)
+- [x] Stock page displays product names resolved from the external catalog, in a single API call per page
+- [x] Product API stopped → stock page still loads, names fall back to raw SKUs, no crash
+- [x] Admin page: `Statut` and `Branche` columns display correctly for every user
 
 ### Security tests
 
-- []
-- []
+- [x] `employee1` (branch 1) sends `POST /branches/2/stock` by hand with curl, bypassing the interface → 403 Branch not allowed
+- [x] Account deactivated **from the admin interface** while the target's session is active → target's session invalidated on their next request, not at next login (`user_loader` checks `is_active`). Tested with two browser windows; complements Soufiane's server-side test of the same rule.
+- [x] Logout → `POST /logout` actually reaches the server and destroys the session (was frontend-only before, see below)
+- [x] `POST /login` with an empty or malformed JSON body → 401, no 500 and no stack trace exposed
+- [x] Admin account targeted by `DELETE /users/1` with curl → 403, the single admin cannot lock the system out
+- [x] Schema review: no product name, price, description or metadata stored locally — `stock` holds only `branch_id`, `product_id` (SKU) and `quantity`
 
 ### Vulnerabilities found and fixed
 
-- []
-- []
+- [x] Logout only cleared the frontend state → the session cookie stayed valid server-side, so a saved request still worked after "logging out". Fixed in `admin/index.html` (calls `POST /logout`).
+- [x] `user_loader` did not check `is_active` → an account deactivated mid-session kept full access until the user logged out on their own. Fixed in `app/__init__.py`.
+- [x] The admin account could be modified or soft-deleted through the API → since no endpoint creates another admin, this locked the system out irreversibly and required reseeding. The interface hid the action but the backend allowed it. Fixed in `routes/users.py` (403 on any admin-targeted write).
+- [x] `POST /login` with a missing field raised `AttributeError` on `None.encode()` → 500 with a stack trace instead of a clean rejection. Fixed in `routes/auth.py` (`get_json(silent=True)` + explicit field check).
+- [x] `add_stock` returned "Unknown product_id" (404) when the Product API was simply unreachable → misleading message, employee unable to diagnose. Cause: `get_product()` swallows every `ProductAPIError` and returns `None`, making an outage indistinguishable from an unknown SKU. Fixed in `routes/stock.py` (503 on outage, 404 only on a real not-found).
+- [x] SQLite does not enforce declared `FOREIGN KEY` constraints by default → a stock or user row could reference a nonexistent branch, silently. Fixed in `app/models.py` with a SQLAlchemy engine listener running `PRAGMA foreign_keys=ON` on every connection.
+- [x] Product name resolution made one HTTP call per SKU → a 20-row stock page triggered 20 round-trips to the external API. Fixed in `app/product_api.py` with `get_product_names()`, a single catalog call mapped to the SKUs on screen.
+- [x] Product API client (Backoffice/admin side) used the wrong port and read the wrong JSON key when parsing the catalog (`results`, not `products`) → every product lookup from the Backoffice returned nothing. Fixed in `app/product_api.py`.
+- [x] Admin page read `u.status` while the backend returns `u.is_active` → `Statut` and `Branche` columns always rendered empty. Fixed in `admin/index.html`.
+- [x] Admin page `reactivate()` called the wrong route → reactivation silently failed. Fixed in `admin/index.html`.
+
+> **Note on overlapping entries.** Soufiane's `PRODUCT_API_URL` entry and the Product API
+> client entry above are two distinct defects on the same integration: his on the Docker URL
+> used for stock validation, this one on the port and response parsing used by the Backoffice
+> product lookup. Likewise, the branch-isolation and mid-session-deactivation rules appear in
+> both sections because each was verified from a different angle, server-side by Soufiane,
+> through the admin interface here.
 
 ---
 
