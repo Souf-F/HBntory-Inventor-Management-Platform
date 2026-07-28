@@ -69,6 +69,7 @@ Each team member documents here the tests they performed on their part of the pr
 ### Functional tests
 
 - [x] `list_products` — paginated listing from the external product API
+- [x] `search_products` — free-text search by name, used by the agent to find a `product_id` instead of guessing a `category` filter
 - [x] `get_product_details` — details of a valid product
 - [x] `get_product_details` — invalid identifier → clear error (no crash)
 - [x] `check_stock` — across all branches
@@ -77,8 +78,15 @@ Each team member documents here the tests they performed on their part of the pr
 - [x] `list_branch_stock` — stock listing for one branch
 - [x] `check_shopping_list` — list satisfiable by at least one branch
 - [x] `check_shopping_list` — list not satisfiable anywhere
+- [x] `POST /ask` — valid question → 200, `{"answer": ...}`
+- [x] `POST /ask` — missing/blank/non-string `question` field → 400, clear error, no call to the agent
+- [x] `GET /health` — 200, `{"status": "ok"}`
 - [x] Public chat: out-of-scope question (not about product, stock, or branch) → polite refusal, no tool called
 - [x] Public chat: question with a quantity → correctly uses `check_shopping_list`, never `check_stock` alone
+- [x] Public chat: the 4 core question types rephrased differently → same correct grounded answer, not tied to exact wording
+- [x] Public chat: product that exists in the catalog but has no stock row anywhere → clearly reported as unavailable, not confused with "product doesn't exist"
+- [x] Public chat: shopping list quantity too large for any single branch → clearly reported as not satisfiable
+- [x] 14 mocked unit tests (`ai_service/tests/test_agent_unit.py`, `test_app_unit.py`) covering the retry loop, rate-limit short-circuit, tool-error reporting, and the `MAX_TOOL_ROUNDS` safety net, against fake Groq/MCP clients (no quota spent)
 
 ### Security tests
 
@@ -89,8 +97,8 @@ Each team member documents here the tests they performed on their part of the pr
 ### Vulnerabilities found and fixed
 
 - [x] `check_stock` with `branch_name` consistently failed (`No branch found with name 'HBntory Paris'`) even though the branch name provided was correct → actual cause: local database not resynced with the new branch names (see Soufiane's section). Not a bug in `tools/stock.py`.
-- []
-- [ ]
+- [x] With parallel tool calls enabled, the model sometimes called a second tool using an invented placeholder argument (e.g. `product_id: "awaiting_search_result"`) for a value it didn't have yet, instead of waiting for the first tool's real result. Fixed in `agent.py` with `parallel_tool_calls=False`, forcing one tool call at a time.
+- [x] `AsyncGroq()` was created in `agent.ask()` but never closed, leaking an HTTP connection on every request (visible as `RuntimeError: Event loop is closed` during test teardown). Fixed by using `async with AsyncGroq() as groq_client`.
 
 ---
 
