@@ -170,8 +170,6 @@ Full schema documentation, including database-level constraints and where valida
 
 ```
 HBntory-Inventor-Management-Platform/
-├── docker-compose.yml                    # Orchestrates all 4 services together
-├── .dockerignore                          # Applies to the mcp_server build (context: project-root/)
 ├── README.md
 └── project-root/
     ├── backoffice/
@@ -188,16 +186,10 @@ HBntory-Inventor-Management-Platform/
     │   │   ├── stock.py                # Stock operations (common user)
     │   │   └── users.py                 # Account management (admin)
     │   ├── requirements.txt
-    │   ├── Dockerfile                   # Backoffice image
-    │   ├── .dockerignore
     │   └── run.py                       # Server entry point
     ├── product_mcp_server/               # MCP server (Noham)
-    │   ├── Dockerfile                     # Build context is project-root/, also copies backoffice/app/
-    │   ├── .dockerignore
     │   └── README.md                      # Pointer to docs/product_mcp_server.md
     ├── ai_service/                        # AI Query Service (Noham)
-    │   ├── Dockerfile
-    │   ├── .dockerignore
     │   └── README.md                      # Pointer to docs/ai_service.md
     ├── hbntory-products-api/               # External Product API provided by the school
     │   ├── data/products.json
@@ -362,10 +354,6 @@ Then open:
 | File | Role in one sentence |
 |---|---|
 | `run.py` | Entry point that starts the Flask server |
-| `docker-compose.yml` (repo root) | Orchestration of the 4 services (Backoffice, Product API, MCP server, AI Service), and the shared SQLite volume between Backoffice and the MCP server |
-| `backoffice/Dockerfile` | Build instructions for the Backoffice image |
-| `product_mcp_server/Dockerfile` | Build instructions for the MCP server image (context is `project-root/`, since it also copies `backoffice/app/` in, so `db.py` can import Branch/Stock) |
-| `ai_service/Dockerfile` | Build instructions for the AI Query Service image |
 
 ---
 
