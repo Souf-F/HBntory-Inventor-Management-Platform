@@ -54,4 +54,4 @@ pytest -m live      # test_agent_live.py, real Groq/MCP calls, run sparingly
 ```
 
 `pytest -m live` requires the Product API and the MCP server running
-(see product_mcp_server/README.md), and `GROQ_API_KEY` set in `.env`.
+(see docs/product_mcp_server.md), and `GROQ_API_KEY` set in `.env`.
