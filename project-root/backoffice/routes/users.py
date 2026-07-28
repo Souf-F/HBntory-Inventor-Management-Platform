@@ -7,6 +7,27 @@ from routes.middleware import role_required
 users_bp = Blueprint("users", __name__)
 
 
+def _reject_if_admin(user):
+    """
+    The single admin account cannot be modified or deactivated through the API.
+
+    There is no endpoint to create another admin, so deactivating this one
+    would lock the system out permanently — the database would have to be
+    reseeded. The frontend already hides these actions (canManage), but a
+    plain curl call would otherwise go straight through: authorization has
+    to be enforced here, on the backend, where it actually counts.
+
+    Returns a ready-to-return 403 response, or None when the user is fine
+    to operate on.
+    """
+    if user.role == Role.ADMIN:
+        return jsonify({
+            "status": "error",
+            "message": "The admin account cannot be modified"
+        }), 403
+    return None
+
+
 @users_bp.route("/users", methods=["GET"])
 @role_required(Role.ADMIN)
 def list_users():
@@ -29,13 +50,19 @@ def list_users():
 @role_required(Role.ADMIN)
 def create_user():
     """Create a new common user, assigned to a branch."""
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     username = data.get("username")
     password = data.get("password")
     branch_id = data.get("branch_id")
 
     if not username or not password or not branch_id:
         return jsonify({"status": "error", "message": "username, password and branch_id are required"}), 400
+
+    # Foreign keys are enforced at the SQLite level (see models.py), so an
+    # unknown branch_id would raise an IntegrityError and surface as a 500.
+    # Check it here instead, to return a clear 400.
+    if Branch.query.get(branch_id) is None:
+        return jsonify({"status": "error", "message": "Unknown branch_id"}), 400
 
     if User.query.filter_by(username=username).first() is not None:
         return jsonify({"status": "error", "message": "Username already taken"}), 409
@@ -61,23 +88,33 @@ def create_user():
 @users_bp.route("/users/<int:user_id>", methods=["PATCH"])
 @role_required(Role.ADMIN)
 def update_user(user_id):
-    """Update a user's password and/or assigned branch."""
+    """Update a user's username, password and/or assigned branch."""
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"status": "error", "message": "User not found"}), 404
 
-    data = request.get_json()
+    blocked = _reject_if_admin(user)
+    if blocked:
+        return blocked
+
+    data = request.get_json(silent=True) or {}
 
     if "username" in data:
+        if not data["username"]:
+            return jsonify({"status": "error", "message": "username cannot be empty"}), 400
         existing = User.query.filter_by(username=data["username"]).first()
         if existing is not None and existing.id != user.id:
             return jsonify({"status": "error", "message": "Username already taken"}), 409
         user.username = data["username"]
 
-    if "password" in data:
+    # data.get() rather than "password" in data: an empty string would
+    # otherwise be hashed and silently become the new password.
+    if data.get("password"):
         user.password_hash = hash_password(data["password"])
 
     if "branch_id" in data:
+        if Branch.query.get(data["branch_id"]) is None:
+            return jsonify({"status": "error", "message": "Unknown branch_id"}), 400
         user.branch_id = data["branch_id"]
 
     db.session.commit()
@@ -92,6 +129,10 @@ def soft_delete_user(user_id):
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"status": "error", "message": "User not found"}), 404
+
+    blocked = _reject_if_admin(user)
+    if blocked:
+        return blocked
 
     user.is_active = False
     db.session.commit()
