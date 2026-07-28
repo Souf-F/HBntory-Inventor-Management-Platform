@@ -1,54 +1,54 @@
-# HBntory — Approche UI/Backend
+# HBntory — UI/Backend Approach
 
-## 1. Deux interfaces, deux publics, aucun partage d'état
+## 1. Two interfaces, two audiences, no shared state
 
-Le projet expose délibérément deux frontends séparés, servis indépendamment, qui ne partagent ni session ni logique de rendu :
+The project deliberately exposes two separate frontends, served independently, sharing neither session nor rendering logic:
 
-- **`admin/`** — Backoffice authentifié, réservé aux employés et à l'admin
-- **`client_web/`** — site public, sans authentification, catalogue + chat IA
+- **`admin/`** — authenticated Backoffice, restricted to employees and the admin
+- **`client_web/`** — public site, no authentication, catalog + AI chat
 
-Ce choix évite qu'une seule interface porte deux logiques d'autorisation différentes (authentifié vs anonyme), ce qui aurait multiplié les conditions et les risques d'erreur d'affichage d'un bouton ou d'une donnée à la mauvaise personne.
+This choice avoids a single interface carrying two different authorization logics (authenticated vs anonymous), which would have multiplied conditionals and the risk of showing the wrong button or data to the wrong person.
 
-## 2. Stack frontend
+## 2. Frontend stack
 
-Les deux frontends sont écrits en HTML/CSS/JS vanilla, avec un moteur de rendu maison (`support.js`, dc-runtime) qui interprète un template `<x-dc>` : bindings `{{ }}`, conditionnelles `<sc-if>`, boucles `<sc-for>`, gestion d'état via une classe `Component extends DCLogic` avec `state`, `setState`, et `renderVals()` qui recalcule les valeurs exposées au template à chaque changement d'état.
+Both frontends are written in vanilla HTML/CSS/JS, with a custom rendering engine (`support.js`, dc-runtime) that interprets an `<x-dc>` template: `{{ }}` bindings, `<sc-if>` conditionals, `<sc-for>` loops, state managed via a `Component extends DCLogic` class with `state`, `setState`, and `renderVals()` recomputing the values exposed to the template on every state change.
 
-Pas de framework (React, Vue) côté build : tout tourne dans un seul fichier `index.html` par interface, chargé directement par le navigateur. Ce choix a été fait pour rester simple à déployer en local (pas de `npm install`, pas de bundler) dans le cadre du projet.
+No build framework (React, Vue) on the frontend side: everything runs in a single `index.html` file per interface, loaded directly by the browser. This choice was made to keep local deployment simple as part of the project (no `npm install`, no bundler).
 
-## 3. Backend : API REST Flask
+## 3. Backend: Flask REST API
 
-Le Backoffice (`backoffice/`) est une API REST Flask classique :
-- Blueprints par domaine (`auth_bp`, `stock_bp`, `users_bp`)
-- SQLAlchemy pour l'ORM, SQLite comme base de développement
-- Flask-Login pour la session, bcrypt pour le hachage des mots de passe
-- flask-cors pour autoriser les requêtes cross-origin depuis les frontends servis sur des ports différents
+The Backoffice (`backoffice/`) is a classic Flask REST API:
+- Blueprints per domain (`auth_bp`, `stock_bp`, `users_bp`)
+- SQLAlchemy for the ORM, SQLite as the development database
+- Flask-Login for the session, bcrypt for password hashing
+- flask-cors to allow cross-origin requests from frontends served on different ports
 
-Chaque route retourne du JSON structuré (`{"status": "success"/"error", ...}`), jamais de HTML. Le frontend ne fait que du `fetch()` avec `credentials: 'include'` pour transmettre le cookie de session.
+Every route returns structured JSON (`{"status": "success"/"error", ...}`), never HTML. The frontend only does `fetch()` with `credentials: 'include'` to pass the session cookie along.
 
-## 4. Où vit la logique métier
+## 4. Where the business logic lives
 
-La règle appliquée dans tout le projet : **le frontend n'est qu'une couche d'affichage et de saisie, jamais une couche de décision**.
+The rule applied throughout the project: **the frontend is only a display and input layer, never a decision layer**.
 
-Concrètement :
-- Le frontend peut masquer un bouton "Créer un utilisateur" pour un common user, mais ce n'est qu'un confort d'affichage — la route `POST /users` refuse quand même la requête côté serveur si le rôle ne correspond pas
-- La validation de quantité (`quantity > 0`, entier) est refaite côté serveur même si le frontend valide déjà le formulaire
-- Le nom de branche affiché dans l'UI (résolu depuis un ID) est une commodité d'affichage ; l'autorisation réelle compare toujours l'ID de branche du compte connecté à celui de la ressource demandée, jamais le nom
+Concretely:
+- The frontend can hide a "Create user" button for a common user, but that's only a display convenience — the `POST /users` route still refuses the request server-side if the role doesn't match
+- Quantity validation (`quantity > 0`, integer) is redone server-side even though the frontend already validates the form
+- The branch name shown in the UI (resolved from an ID) is a display convenience; the actual authorization always compares the connected account's branch ID to the requested resource's, never the name
 
-Cette séparation est documentée en détail dans `docs/authentication.md`.
+This separation is documented in detail in `docs/authentication.md`.
 
-## 5. Communication frontend/backend : REST, sans état conservé
+## 5. Frontend/backend communication: REST, no state kept
 
-Toutes les interactions (login, gestion stock, gestion utilisateurs, chat IA) passent par des appels REST classiques, sans WebSocket. Le chat IA en particulier est stateless : chaque question envoyée à `POST /ask` est traitée indépendamment, sans historique de conversation conservé côté serveur entre deux questions. Ce choix simplifie le déploiement (pas de gestion de connexion persistante) et convient au cas d'usage (questions ponctuelles, pas de dialogue multi-tours nécessaire).
+Every interaction (login, stock management, user management, AI chat) goes through standard REST calls, no WebSocket. The AI chat in particular is stateless: each question sent to `POST /ask` is handled independently, with no conversation history kept server-side between two questions. This choice simplifies deployment (no persistent connection to manage) and fits the use case (one-off questions, no multi-turn dialogue needed).
 
-## 6. Approche des erreurs réseau côté frontend
+## 6. Approach to network errors on the frontend
 
-Chaque appel `fetch()` passe par une méthode `api()` centralisée qui distingue trois cas :
-- Succès (`res.ok`) → mise à jour du state, toast de confirmation
-- Erreur métier renvoyée par le serveur (4xx avec un message JSON) → affichage du message d'erreur exact renvoyé par le backend, pas un message générique
-- Échec réseau complet (serveur injoignable, timeout) → message générique "Le serveur ne répond pas", distinct du cas précédent
+Every `fetch()` call goes through a centralized `api()` method that distinguishes three cases:
+- Success (`res.ok`) → state update, confirmation toast
+- Business error returned by the server (4xx with a JSON message) → display the exact error message returned by the backend, not a generic one
+- Full network failure (server unreachable, timeout) → generic "Server not responding" message, distinct from the case above
 
-Cette distinction a été utile en debug : un bug qui ressemblait à une déconnexion aléatoire s'est avéré être un rechargement de page causé par l'outil de développement (Live Server) plutôt qu'un vrai problème de session — la distinction claire entre erreur réseau et erreur métier dans les logs a permis de l'isoler rapidement.
+This distinction proved useful during debugging: a bug that looked like a random disconnection turned out to be a page reload caused by the development tool (Live Server) rather than an actual session issue — the clear distinction between network error and business error in the logs made it possible to isolate quickly.
 
-## 7. Ce qui n'est pas dans le frontend
+## 7. What isn't in the frontend
 
-Aucune information produit (nom, prix, description) n'est codée en dur ou mise en cache côté frontend au-delà de l'affichage courant : chaque page recharge les données depuis l'API produit externe ou depuis la base de stock locale à chaque visite. Voir `docs/architecture.md`, section 3, pour la règle d'or sur la séparation produit/stock.
+No product information (name, price, description) is hardcoded or cached on the frontend beyond the current display: every page reloads data from the external product API or the local stock database on every visit. See `docs/architecture.md`, section 3, for the golden rule on product/stock separation.
