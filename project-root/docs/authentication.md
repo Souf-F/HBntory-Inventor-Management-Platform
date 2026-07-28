@@ -1,71 +1,66 @@
-# HBntory — Authentification et autorisation
+HBntory - Authentication and Authorization
+1. Overview
 
-## 1. Vue d'ensemble
+The HBntory Backoffice uses session-based authentication (Flask-Login), with passwords hashed using bcrypt. There is no JWT token or API key: after logging in, the browser receives a signed session cookie, sent automatically with every subsequent request.
 
-Le Backoffice HBntory utilise une authentification par **session** (Flask-Login), avec des mots de passe hachés en **bcrypt**. Il n'y a pas de token JWT ni d'API key : après connexion, le navigateur reçoit un cookie de session signé, envoyé automatiquement à chaque requête suivante.
+Authorization relies on two layers, both verified server-side: the account's role (Role) and, for common users, the branch that account is tied to (branch_id). No permission check is ever performed on the frontend: hiding a button in the interface is never treated as an access control.
 
-L'autorisation repose sur deux niveaux, tous deux vérifiés **côté serveur** : le rôle du compte (`Role`) et, pour les common users, la branche à laquelle ce compte est rattaché (`branch_id`). Aucune vérification de droits n'est faite côté frontend : masquer un bouton dans l'interface n'est jamais considéré comme un contrôle d'accès.
+2. Data model
 
-## 2. Modèle de données
+Defined in backoffice/app/models.py.
 
-Défini dans `backoffice/app/models.py`.
-
-```python
+python
 class Role(enum.Enum):
     ADMIN = "admin"
     COMMON_USER = "common_user"
-```
 
-Table `users` :
-- `username` — unique
-- `password_hash` — bcrypt, jamais stocké en clair
-- `role` — `ADMIN` ou `COMMON_USER`
-- `branch_id` — clé étrangère vers `branches`, nullable
-- `is_active` — booléen, utilisé pour le soft-delete
+users table:
 
-Une contrainte au niveau base de données garantit la cohérence rôle/branche :
+username — unique
+password_hash — bcrypt, never stored in plain text
+role — ADMIN or COMMON_USER
+branch_id — foreign key to branches, nullable
+is_active — boolean, used for soft-delete
 
-```python
+A database-level constraint enforces role/branch consistency:
+
+python
 CheckConstraint(
     "(role = 'ADMIN' AND branch_id IS NULL) OR "
     "(role = 'COMMON_USER' AND branch_id IS NOT NULL)",
 )
-```
 
-Un admin n'a jamais de branche. Un common user a toujours exactement une branche. Cette règle est appliquée dès la création du schéma, pas seulement en application.
+An admin never has a branch. A common user always has exactly one branch. This rule is enforced at schema creation time, not only at the application level.
 
-`User` hérite de `UserMixin` (Flask-Login), ce qui fournit `get_id()`, `is_authenticated`, `is_active`, `is_anonymous` sans les redéfinir à la main.
+User inherits from UserMixin (Flask-Login), which provides get_id(), is_authenticated, is_active, is_anonymous without redefining them manually.
 
-## 3. Hachage des mots de passe
+3. Password hashing
 
-Dans `backoffice/routes/auth.py` :
+In backoffice/routes/auth.py:
 
-```python
+python
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 def verify_password(password: str, password_hash: str) -> bool:
     return bcrypt.checkpw(password.encode(), password_hash.encode())
-```
 
-Le sel est généré automatiquement par `bcrypt.gensalt()` à chaque hachage — deux comptes avec le même mot de passe n'ont jamais le même hash stocké.
+The salt is generated automatically by bcrypt.gensalt() on every hash — two accounts sharing the same password never end up with the same stored hash.
 
-## 4. Connexion (`POST /login`)
+4. Login (POST /login)
+Look up the user by username
+Reject if the user doesn't exist, if the password is incorrect, or if the account is disabled (is_active = False) — in all cases, the same generic message "Invalid credentials" is returned (401), so as not to reveal whether the username or the password was at fault
+If everything checks out, login_user(user) creates the Flask-Login session
+The response returns username, role, and branch_id — these three fields let the frontend know which view to route the user to (user list for an admin, stock view for a common user) without needing a second round-trip
+5. Logout (POST /logout)
 
-1. Recherche de l'utilisateur par `username`
-2. Rejet si l'utilisateur n'existe pas, si le mot de passe est incorrect, ou si le compte est désactivé (`is_active = False`) — dans tous les cas, le même message générique `"Invalid credentials"` est renvoyé (401), pour ne pas révéler si c'est le nom d'utilisateur ou le mot de passe qui est en cause
-3. Si tout est valide, `login_user(user)` crée la session Flask-Login
-4. La réponse renvoie `username`, `role`, et `branch_id` — ces trois champs permettent au frontend de savoir vers quelle vue router l'utilisateur (liste des utilisateurs pour un admin, vue stock pour un common user) sans avoir à interroger une deuxième route
+Protected by @login_required. Calls logout_user(), which invalidates the session server-side.
 
-## 5. Déconnexion (`POST /logout`)
+6. Role-based authorization: role_required
 
-Protégée par `@login_required`. Appelle `logout_user()`, qui invalide la session côté serveur.
+Defined in backoffice/routes/middleware.py:
 
-## 6. Autorisation par rôle : `role_required`
-
-Défini dans `backoffice/routes/middleware.py` :
-
-```python
+python
 def role_required(*roles):
     def decorator(f):
         @wraps(f)
@@ -77,27 +72,25 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return wrapper
     return decorator
-```
 
-Utilisé en décorateur sur chaque route sensible, par exemple :
+Used as a decorator on every sensitive route, for example:
 
-```python
+python
 @role_required(Role.ADMIN)
 def list_users(): ...
 
 @role_required(Role.COMMON_USER)
 def add_stock(branch_id): ...
-```
 
-Deux cas d'échec distincts :
-- Pas de session valide → 401 Unauthorized
-- Session valide mais mauvais rôle → 403 Access denied
+Two distinct failure cases:
 
-## 7. Autorisation par branche : `branch_required`
+No valid session → 401 Unauthorized
+Valid session but wrong role → 403 Access denied
+7. Branch-based authorization: branch_required
 
-Toujours dans `middleware.py`, appliqué en complément de `role_required` sur les routes stock :
+Also in middleware.py, applied alongside role_required on stock routes:
 
-```python
+python
 def branch_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -106,44 +99,38 @@ def branch_required(f):
             return jsonify({"status": "error", "message": "Access denied"}), 403
         return f(*args, **kwargs)
     return wrapper
-```
 
-Compare le `branch_id` de l'URL (`/branches/<int:branch_id>/stock`) à celui du compte connecté. Un common user ne peut jamais agir sur le stock d'une autre branche que la sienne, même en modifiant l'URL manuellement.
+Compares the branch_id from the URL (/branches/<int:branch_id>/stock) against the connected account's own branch. A common user can never act on another branch's stock, even by manually editing the URL.
 
-## 8. Matrice de permissions par route
+8. Permission matrix by route
+Route	Method	Role required	Branch constraint
+/login	POST	none	—
+/logout	POST	authenticated	—
+/users	GET, POST	ADMIN	—
+/users/<id>	PATCH, DELETE	ADMIN	—
+/users/<id>/reactivate	PATCH	ADMIN	—
+/branches/<id>/stock	GET, POST	COMMON_USER	yes, own branch only
+/branches/<id>/stock/remove	POST	COMMON_USER	yes, own branch only
+/branches/<id>/stock/<product_id>	GET	COMMON_USER	yes, own branch only
+/products	GET	COMMON_USER	—
+/stock	GET	ADMIN	— (global multi-branch view, read-only)
 
-| Route | Méthode | Rôle requis | Contrainte branche |
-|---|---|---|---|
-| `/login` | POST | aucun | — |
-| `/logout` | POST | authentifié | — |
-| `/users` | GET, POST | ADMIN | — |
-| `/users/<id>` | PATCH, DELETE | ADMIN | — |
-| `/users/<id>/reactivate` | PATCH | ADMIN | — |
-| `/branches/<id>/stock` | GET, POST | COMMON_USER | oui, sa branche uniquement |
-| `/branches/<id>/stock/remove` | POST | COMMON_USER | oui, sa branche uniquement |
-| `/branches/<id>/stock/<product_id>` | GET | COMMON_USER | oui, sa branche uniquement |
-| `/products` | GET | COMMON_USER | — |
-| `/stock` | GET | ADMIN | — (vue globale multi-branches, lecture seule) |
+An admin has no access to any stock-writing route. A common user has no access to any user-management route. This is not a frontend convention: every route explicitly refuses the call if the role doesn't match.
 
-Un admin n'a accès à aucune route stock d'écriture. Un common user n'a accès à aucune route utilisateurs. Ce n'est pas une convention côté frontend : chaque route refuse explicitement l'appel si le rôle ne correspond pas.
+9. Account deletion: soft-delete only
 
-## 9. Suppression de compte : soft-delete uniquement
+DELETE /users/<id> never removes the row from the database. It sets is_active to False:
 
-`DELETE /users/<id>` ne supprime jamais la ligne en base. Il passe `is_active` à `False` :
-
-```python
+python
 user.is_active = False
 db.session.commit()
-```
 
-Un compte désactivé ne peut plus se connecter (vérifié à l'étape 2 du login), mais son historique (créations de stock passées, etc.) reste intact. `PATCH /users/<id>/reactivate` inverse l'opération.
+A disabled account can no longer log in (checked at login step 2), but its history (past stock operations, etc.) remains intact. PATCH /users/<id>/reactivate reverses the operation.
 
-## 10. Ce que l'autorisation ne couvre pas
+10. What authorization does not cover
+No login attempt throttling (no rate limiting on /login) — out of scope for this project
+No automatic session expiration beyond Flask-Login's default behavior
+SECRET_KEY (used to sign session cookies) is hardcoded with a development value in app/config.py, to be overridden via the SECRET_KEY environment variable in a production setting
+11. Boundary with the public site
 
-- Pas de limitation de tentatives de connexion (pas de rate limiting sur `/login`) — hors périmètre de ce projet
-- Pas d'expiration automatique de session au-delà du comportement par défaut de Flask-Login
-- `SECRET_KEY` (utilisée pour signer les cookies de session) est définie en dur avec une valeur de développement dans `app/config.py`, à surcharger via la variable d'environnement `SECRET_KEY` dans un environnement de production
-
-## 11. Frontière avec le site public
-
-Le site public (`client_web/`) n'a **aucune authentification** et n'appelle jamais les routes du Backoffice. Il ne consulte que l'API produit externe (lecture seule) et l'agent IA, qui lui-même n'a accès qu'à des opérations de lecture sur le stock (jamais d'écriture) via les tools du serveur MCP. Aucune donnée de session, aucun cookie, aucun rôle n'existe côté site public.
+The public site (client_web/) has no authentication and never calls Backoffice routes. It only queries the external product API (read-only) and the AI agent, which itself only has read access to stock (never write) through the MCP server's tools. No session data, no cookie, no role ever exists on the public site side.

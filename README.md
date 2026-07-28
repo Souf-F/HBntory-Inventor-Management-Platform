@@ -398,3 +398,11 @@ One point of attention is carried forward to Task 6 (Client Web Interface): data
 - **`db.create_all()` does not migrate.** It creates missing tables but never alters existing ones, so a database created before a constraint was added will not gain it. During development the fix is to delete the file and re-seed; Alembic would be the production answer.
 - **SQLite serializes writes.** Sufficient for the project's scope. `SQLALCHEMY_DATABASE_URI` is environment-overridable, so moving to PostgreSQL requires no code change.
 - **No SSL/TLS**, explicitly out of scope per the project brief.
+
+---
+
+## Authors
+
+- **Soufiane Filali** — [github.com/Souf-F](https://github.com/Souf-F)
+- **Sagal-Louise Haider** — [github.com/sagalou](https://github.com/sagalou)
+- **Noham Oulma** — [github.com/nohamoulma-hub](https://github.com/nohamoulma-hub)
